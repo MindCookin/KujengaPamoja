@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html>
+	<head>
+		<script src='/_ah/channel/jsapi'></script>
+	</head>
+    <body>
+  
+	{% if user1 %}
+		<h1>Player</h1>
+	{% else %}
+		<h1>Machine</h1>
+	{% endif %}
+  
+      {% if token %}
+        <p>{{ token }}</p> 
+      {% else %}
+        <p>NO token!!</p> 
+      {% endif %}
+	  
+	  <p>Gamekey:{{ game_key }}</p>
+	  <p>Machine:{{ machine }}, User1 : {{ user1 }}, User2 : {{ user2 }}, User3 : {{ user3 }}, User4 : {{ user4 }}</p>
+	 
+	{% if user1 %}
+    <form id="formulario">
+		<div><label for="selectRow">Select Row</label><input name="selectRow" type="text"></input></div>
+		<div><label for="selectCol">Select Col</label><input name="selectCol" type="text"></input></div>
+		<div><label for="moveX">X</label><input name="moveX" type="text"></input></div>
+		<div><label for="moveY">Y</label><input name="moveY" type="text"></input></div>
+		<div><label for="moveZ">Z</label><input name="moveZ" type="text"></input></div>
+		<div><input type="submit" value="Send"></div>
+    </form>
+	{% endif %}
+	
+	<p id="tracer"></p>
+	
+	
+	<script>
+	var state = {
+        game_key: '{{ game_key }}',
+        me: '{{ me }}'
+    };
+
+	sendMessage = function(path, opt_param) {
+        
+		path += '?g=' + state.game_key;
+        
+		if (opt_param) {
+			path += '&' + opt_param;
+        }
+			var xhr = new XMLHttpRequest();
+			xhr.open('POST', path, true);
+			xhr.send();
+	};
+	  
+	onOpened = function() {
+		console.log( "onOpened" );
+		sendMessage('/opened');
+	};
+			  
+	onMessage = function(m) {
+			  
+		// The first connection receives a bad formatted JSON
+		// so first of all I check if the message(m) is ok or not
+				
+			console.log( "onMessage : received message" );
+			
+			try
+			{
+			   newState = JSON.parse(m.data);
+			}
+			catch(e)
+			{
+				console.log( "onMessage : Error parsing" );
+				newState= "";
+			}
+				
+			if( newState ) { 
+				console.log( "onMessage : success!!" );
+				
+				state.machine = newState.machine || state.machine;
+				state.user1 = newState.user1 || state.user1;
+				state.user2 = newState.user2 || state.user2;
+				state.user3 = newState.user3 || state.user3;
+				state.user4 = newState.user4 || state.user4;
+				state.active = newState.active || state.active;
+				
+				document.getElementById('tracer').innerHTML = "onMessage : Received from " + state.active;
+			}
+		};
+			  
+		 onError = function(e){
+			alert( "Error: " + JSON.parse(e.data) );			
+		};
+			  
+		onClose = function(e){
+			alert( "Close: " + JSON.parse(e.data) );
+		};
+			  
+		openChannel = function() {
+
+			var token = '{{ token }}';
+			var channel = new goog.appengine.Channel( token );
+				
+			console.log( token );
+				
+			var handler = {
+				'onopen': onOpened,
+				'onmessage': onMessage,
+				'onerror': onError,
+				'onclose': onClose
+			};
+
+			var socket = channel.open(handler);
+			socket.onopen = onOpened;
+			socket.onmessage = onMessage;
+		}
+			  
+		initialize = function() {
+			openChannel();
+			
+			onMessage({data: '{{ initial_message }}'});
+			
+			if ( document.getElementById("formulario") )
+				document.getElementById("formulario").onsubmit = sendFormulario;
+		}      
+		
+		sendFormulario = function() {
+			
+			var data = 	'sender='	+ state.me + '&' +
+						'r='	+ document.getElementsByName( "selectRow" )[0].value + '&' +
+						'c='	+ document.getElementsByName( "selectCol" )[0].value + '&' +
+						'x=' 	+ document.getElementsByName( "moveX" )[0].value + '&' +
+						'y=' 	+ document.getElementsByName( "moveY" )[0].value + '&' +
+						'z=' 	+ document.getElementsByName( "moveZ" )[0].value;
+			
+			sendMessage('/selected', data);
+			return false;
+		}
+
+		setTimeout(initialize, 100);
+	</script>
+  </body>
+</html>
+{% endautoescape %}
