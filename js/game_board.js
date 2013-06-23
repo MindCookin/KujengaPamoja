@@ -1,279 +1,320 @@
+GameBoardClass = Class.extend({	
 
-Physijs.scripts.worker 	= 'js/libs/physijs_worker.js';
-Physijs.scripts.ammo 	= 'ammo.js';
+	CUBE_DIMENSIONS : { w : 25, h : 15, d : 75 },
+	VIEWPORT_DIMENSIONS : { w : 900, h : 700 },
+
+	stats		: null, 
+	physics_stats:null,
 	
-var connection;	
-var container, stats, physics_stats;
-var camera, controls, scene, projector, renderer;
-var objects = [], plane;
-
-var mouse = new THREE.Vector2(),
-offset = new THREE.Vector3(),
-INTERSECTED, SELECTED;
-
-var VIEWPORT_WIDTH 	= 900;
-var VIEWPORT_HEIGHT = 700;
-
-
-window.onload = function() {
-	init();
-	animate();
+	camera		: null, 
+	controls	: null, 
+	scene		: null,
+	renderer	: null,
 	
-	};
+	objects 	: [],
+	actualSelection : { floor : 0, line : 0 },
 
-function init() {
-
-	container = document.getElementById( 'game_wrapper' );
+	start : function() {
 	
-	document.body.appendChild( container );
+		Physijs.scripts.worker 	= 'js/libs/physijs_worker.js';
+		Physijs.scripts.ammo 	= 'ammo.js';
 
-	renderer = new THREE.WebGLRenderer( { antialias: true } );
-	renderer.sortObjects = false;
-	renderer.setSize( VIEWPORT_WIDTH, VIEWPORT_HEIGHT );
-
-	renderer.shadowMapEnabled = true;
-	renderer.shadowMapType = THREE.PCFShadowMap;
-
-	container.appendChild( renderer.domElement );
-
-	camera = new THREE.PerspectiveCamera( 50, VIEWPORT_WIDTH / VIEWPORT_HEIGHT, 1, 10000 );
-	camera.position.z = 250;
-	camera.position.y = 170;
-	camera.position.x = 120;
-	camera.lookAt( new THREE.Vector3( 0, 200, 0 ) );
-
-	controls = new THREE.TrackballControls( camera );
-	controls.enabled = false;
-	controls.rotateSpeed = 1.0;
-	controls.zoomSpeed = 1.2;
-	controls.panSpeed = 0.8;
-	controls.noZoom = false;
-	controls.noPan = false;
-	controls.staticMoving = true;
-	controls.dynamicDampingFactor = 0.3;
-
-	scene = new Physijs.Scene();
-
-	scene.add( new THREE.AmbientLight( 0x333333 ) );
-
-	directionalLight = new THREE.DirectionalLight( 0xffffff, 1.5 );
-	directionalLight.position.copy( camera.position );
-	directionalLight.castShadow = true;
-
-	directionalLight.shadowCameraNear = 200;
-	directionalLight.shadowCameraFar = camera.far;
-	directionalLight.shadowCameraFov = 50;
-
-	directionalLight.shadowBias = -0.00022;
-	directionalLight.shadowDarkness = 0.5;
-
-	directionalLight.shadowMapWidth = 1024;
-	directionalLight.shadowMapHeight = 1024;
-
-	scene.add( directionalLight );
-	
-	var groundGeom = new THREE.PlaneGeometry( 768, 768 );
-	var ground = new Physijs.BoxMesh( groundGeom, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
-	
-	ground.rotation.x = -90*Math.PI/180;
-	ground.receiveShadow = true;
-	ground.__dirtyPosition = true;
-	
-	scene.add( ground );
-
-	var geometry = new THREE.CubeGeometry( 25, 15, 75 );
-
-	for ( var i = 0; i < 21; i ++ ) {
-
-		var floor 	= Math.floor(i/3);
-		var line 	= Math.floor(i%3);
-
-		var object = new Physijs.BoxMesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );	
-		object.material.ambient = object.material.color;
-
-		object.position.x = ( floor % 2 === 0 ) ? line * geometry.width - ( geometry.width * 1.5 ) : -geometry.width /2;
-		object.position.y = geometry.height/2 + ( geometry.height*1*floor );
-		object.position.z = ( floor % 2 === 0 ) ? 0 : line * geometry.width - ( geometry.width ) ;
-
-		object.rotation.x = 0;
-		object.rotation.y = ( floor % 2 === 0 ) ? 0 : Math.PI / 2.01;
-		object.rotation.z = 0;
-
-		object.castShadow = true;
-		object.receiveShadow = true;
-		object.__dirtyPosition = true;
-
-		scene.add( object );
-
-		objects.push( object );
-	}
-
-	plane = new THREE.Mesh( new THREE.PlaneGeometry( 2000, 2000, 8, 8 ), new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 0.25, transparent: true, wireframe: true } ) );
-	plane.visible = false;
-	scene.add( plane );
-
-	projector = new THREE.Projector();
-
-	var info = document.createElement( 'div' );
-	info.style.position = 'absolute';
-	info.style.top = '10px';
-	info.style.width = '100%';
-	info.style.textAlign = 'center';
-	info.innerHTML = '<a href="http://threejs.org" target="_blank">three.js</a> webgl - draggable cubes';
-	container.appendChild( info );
-
-	stats = new Stats();
-	stats.domElement.style.position = 'absolute';
-	stats.domElement.style.top = '0px';
-	container.appendChild( stats.domElement );
-
-	physics_stats = new Stats();
-	physics_stats.domElement.style.position = 'absolute';
-	physics_stats.domElement.style.top = '50px';
-	physics_stats.domElement.style.zIndex = 100;
-	container.appendChild( physics_stats.domElement );
+		var container = document.getElementById( 'game_wrapper' );
 		
-//	renderer.domElement.addEventListener( 'mousemove', onDocumentMouseMove, false );
-//	renderer.domElement.addEventListener( 'mousedown', onDocumentMouseDown, false );
-//	renderer.domElement.addEventListener( 'mouseup', onDocumentMouseUp, false );
+//		document.body.appendChild( container );
 
-	window.addEventListener( 'resize', onWindowResize, false );
+		gameBoard.renderer = new THREE.WebGLRenderer( { antialias: true } );
+		gameBoard.renderer.sortObjects = false;
+		gameBoard.renderer.setSize( gameBoard.VIEWPORT_DIMENSIONS.w, gameBoard.VIEWPORT_DIMENSIONS.h );
 
-}
+		gameBoard.renderer.shadowMapEnabled = true;
+		gameBoard.renderer.shadowMapType = THREE.PCFShadowMap;
 
-function onWindowResize() {
+		container.appendChild( gameBoard.renderer.domElement );
 
-	camera.aspect = VIEWPORT_WIDTH / VIEWPORT_HEIGHT;
-	camera.updateProjectionMatrix();
+		gameBoard.camera = new THREE.PerspectiveCamera( 50, gameBoard.VIEWPORT_DIMENSIONS.w / gameBoard.VIEWPORT_DIMENSIONS.h, 1, 10000 );
+		gameBoard.camera.position.z = 250;
+		gameBoard.camera.position.y = 170;
+		gameBoard.camera.position.x = 120;
+		gameBoard.camera.lookAt( new THREE.Vector3( 0, 200, 0 ) );
 
-	renderer.setSize( VIEWPORT_WIDTH, VIEWPORT_HEIGHT );
+		gameBoard.controls = new THREE.TrackballControls( gameBoard.camera );
+		gameBoard.controls.enabled = false;
+		gameBoard.controls.rotateSpeed = 1.0;
+		gameBoard.controls.zoomSpeed = 1.2;
+		gameBoard.controls.panSpeed = 0.8;
+		gameBoard.controls.noZoom = false;
+		gameBoard.controls.noPan = false;
+		gameBoard.controls.staticMoving = true;
+		gameBoard.controls.dynamicDampingFactor = 0.3;
 
-}
+		gameBoard.scene = new Physijs.Scene();
 
-function onDocumentMouseMove( event ) {
+		gameBoard.scene.add( new THREE.AmbientLight( 0x333333 ) );
 
-	event.preventDefault();
+		directionalLight = new THREE.DirectionalLight( 0xffffff, 1.5 );
+		directionalLight.position.copy( gameBoard.camera.position );
+		directionalLight.castShadow = true;
 
-	mouse.x = ( event.clientX / VIEWPORT_WIDTH ) * 2 - 1;
-	mouse.y = - ( event.clientY / VIEWPORT_HEIGHT ) * 2 + 1;
+		directionalLight.shadowCameraNear = 200;
+		directionalLight.shadowCameraFar = gameBoard.camera.far;
+		directionalLight.shadowCameraFov = 50;
 
-	//
+		directionalLight.shadowBias = -0.00022;
+		directionalLight.shadowDarkness = 0.5;
 
-	var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
-	projector.unprojectVector( vector, camera );
+		directionalLight.shadowMapWidth = 1024;
+		directionalLight.shadowMapHeight = 1024;
 
-	var raycaster = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
+		gameBoard.scene.add( directionalLight );
+		
+		var groundGeom = new THREE.PlaneGeometry( 768, 768 );
+		var ground = new Physijs.BoxMesh( groundGeom, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
+		
+		ground.rotation.x = -90*Math.PI/180;
+		ground.receiveShadow = true;
+		ground.__dirtyPosition = true;
+		
+		gameBoard.scene.add( ground );
 
+		var geometry = new THREE.CubeGeometry( gameBoard.CUBE_DIMENSIONS.w, gameBoard.CUBE_DIMENSIONS.h, gameBoard.CUBE_DIMENSIONS.d );
 
-	if ( SELECTED ) {
+		for ( var i = 0; i < 19; i ++ ) {
 
-		var intersects = raycaster.intersectObject( plane );
-		SELECTED.position.copy( intersects[ 0 ].point.sub( offset ) );
-		return;
+			var floor 	= Math.floor(i/3);
+			var line 	= Math.floor(i%3);
 
-	}
+			var object = new Physijs.BoxMesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );	
+			object.material.ambient = object.material.color;
 
+			object.position.x = ( floor % 2 === 0 ) ? line * gameBoard.CUBE_DIMENSIONS.w - ( gameBoard.CUBE_DIMENSIONS.w * 1.5 ) : -gameBoard.CUBE_DIMENSIONS.w /2;
+			object.position.y = gameBoard.CUBE_DIMENSIONS.h/2 + ( gameBoard.CUBE_DIMENSIONS.h*1*floor );
+			object.position.z = ( floor % 2 === 0 ) ? 0 : line * gameBoard.CUBE_DIMENSIONS.w - ( gameBoard.CUBE_DIMENSIONS.w ) ;
 
-	var intersects = raycaster.intersectObjects( objects );
+			object.rotation.x = 0;
+			object.rotation.y = ( floor % 2 === 0 ) ? 0 : Math.PI / 2.01;
+			object.rotation.z = 0;
 
-	if ( intersects.length > 0 ) {
+			object.castShadow = true;
+			object.receiveShadow = true;
+			object.__dirtyPosition = true;
 
-		if ( INTERSECTED != intersects[ 0 ].object ) {
-
-			if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
-
-			INTERSECTED = intersects[ 0 ].object;
-			INTERSECTED.currentHex = INTERSECTED.material.color.getHex();
-
-			plane.position.copy( INTERSECTED.position );
-			plane.lookAt( camera.position );
-
+			gameBoard.scene.add( object );
+			
+			if ( !gameBoard.objects[ floor ] )
+				gameBoard.objects[ floor ] = [];
+			
+			gameBoard.objects[ floor ][line] = object;
 		}
 
-		container.style.cursor = 'pointer';
+		var info = document.createElement( 'div' );
+		info.style.position = 'absolute';
+		info.style.top = '10px';
+		info.style.width = '100%';
+		info.style.textAlign = 'center';
+		info.innerHTML = '<a href="http://threejs.org" target="_blank">three.js</a> webgl - draggable cubes';
+		container.appendChild( info );
 
-	} else {
+		gameBoard.stats = new Stats();
+		gameBoard.stats.domElement.style.position = 'absolute';
+		gameBoard.stats.domElement.style.top = '0px';
+		container.appendChild( gameBoard.stats.domElement );
 
-		if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
+		gameBoard.physics_stats = new Stats();
+		gameBoard.physics_stats.domElement.style.position = 'absolute';
+		gameBoard.physics_stats.domElement.style.top = '50px';
+		gameBoard.physics_stats.domElement.style.zIndex = 99;
+		container.appendChild( gameBoard.physics_stats.domElement );
+	
+//		window.addEventListener( 'resize', gameBoard.onWindowResize, false );
 
-		INTERSECTED = null;
+	},
 
-		container.style.cursor = 'auto';
+	onWindowResize : function() {
 
-	}
+		gameBoard.camera.aspect = gameBoard.VIEWPORT_DIMENSIONS.w / gameBoard.VIEWPORT_DIMENSIONS.h;
+		gameBoard.camera.updateProjectionMatrix();
 
-}
+		gameBoard.renderer.setSize( gameBoard.VIEWPORT_DIMENSIONS.w, gameBoard.VIEWPORT_DIMENSIONS.h );
 
-function onDocumentMouseDown( event ) {
+	},
 
-	event.preventDefault();
+	animate : function() {
 
-	var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
-	projector.unprojectVector( vector, camera );
+		requestAnimationFrame( gameBoard.animate );
 
-	var raycaster = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
-
-	var intersects = raycaster.intersectObjects( objects );
-
-	if ( intersects.length > 0 ) {
-
-		controls.enabled = false;
-
-		SELECTED = intersects[ 0 ].object;
+		gameBoard.render();
 		
-		var intersects = raycaster.intersectObject( plane );
-		offset.copy( intersects[ 0 ].point ).sub( plane.position );
+		gameBoard.stats.update();
+		gameBoard.physics_stats.update();
+	},
 
-		container.style.cursor = 'move';
+	render : function() {
+		
+		directionalLight.position.copy( gameBoard.camera.position );
+		
+		gameBoard.controls.update();
+		
+		if ( connections.data.state != PLAY_PLACE )
+			gameBoard.scene.simulate( 1.5, 5 );
 
-	}
+		gameBoard.renderer.render( gameBoard.scene, gameBoard.camera );
+	},
 
-}
-
-function onDocumentMouseUp( event ) {
-
-	event.preventDefault();
-
-	controls.enabled = true;
-
-	if ( INTERSECTED ) {
-
-		plane.position.copy( INTERSECTED.position );
-
-		SELECTED = null;
-
-	}
-
-	container.style.cursor = 'auto';
-
-}
-
-//
-
-function animate() {
-
-	requestAnimationFrame( animate );
-
-	render();
+	handleSelection :function( direction ) {
+		
+		switch( direction )
+		{
+			case 0 : gameBoard.actualSelection.floor++; break;	// up
+			case 1 : gameBoard.actualSelection.line--; break;	// left
+			case 2 : gameBoard.actualSelection.floor--; break;	// down
+			case 3 : gameBoard.actualSelection.line++; break;	// right
+		}
+		
+		if ( gameBoard.actualSelection.floor >= gameBoard.objects.length )
+			gameBoard.actualSelection.floor = 0;
+		else if (  gameBoard.actualSelection.floor < 0 )
+			gameBoard.actualSelection.floor = gameBoard.objects.length - 1;
+			
+		var lineArray = gameBoard.objects[ gameBoard.actualSelection.floor ];	
+		if ( gameBoard.actualSelection.line >= lineArray.length )
+			gameBoard.actualSelection.line = 0;
+		else if ( gameBoard.actualSelection.line < 0 )
+			gameBoard.actualSelection.line = lineArray.length - 1;
+		
+		gameBoard.select(); 
+	},
 	
-	stats.update();
-	physics_stats.update();
-}
+	select : function() {
+		
+		var actualObject = gameBoard.objects[ gameBoard.actualSelection.floor ][ gameBoard.actualSelection.line ];
+		actualObject.material.transparent 	= false;
+		actualObject.material.opacity 		= 1;
+		actualObject.castShadow 	= true;
+		actualObject.receiveShadow 	= true;
 
-function render() {
+		for ( var i = 0; i < gameBoard.objects.length; i++ )
+		{
+			for (var j = 0; j < gameBoard.objects[i].length; j++ )
+			{
+				if ( gameBoard.objects[i][j] !=  actualObject )
+				{
+					gameBoard.objects[i][j].material.transparent = true;
+					gameBoard.objects[i][j].material.opacity = .3;
+					gameBoard.objects[i][j].castShadow 		= false;
+					gameBoard.objects[i][j].receiveShadow 	= false;
+				}
+			}
+		}
+	},
 
-	$("#console").text( SELECTED );
-	
-	if ( SELECTED )
+	handleMove: function( direction ){
+		
+		var vector = new THREE.Vector3;
+		
+		switch( direction )
+		{
+			case 0 : vector.z = -40; break;	// up
+			case 1 : vector.x = -40; break;	// left
+			case 2 : vector.z = 40; break;	// down
+			case 3 : vector.x = 40; break;	// right
+		}
+		
+		gameBoard.move( vector );
+	},
+		
+	move : function( vector ) 
 	{
-		SELECTED.__dirtyPosition = true;
-	}
+		var actualObject = gameBoard.objects[ gameBoard.actualSelection.floor ][ gameBoard.actualSelection.line ];
+		actualObject.setLinearVelocity( vector );
+	}, 
 	
-	directionalLight.position.copy( camera.position );
+	handlePlace : function( direction ){
 	
-	controls.update();
+		var actualObject = gameBoard.objects[ gameBoard.actualSelection.floor ][ gameBoard.actualSelection.line ];
+		var lastLineArray 	= gameBoard.objects[ gameBoard.objects.length - 1 ];
+		var floor 			= gameBoard.objects.length - 1;
+		var freePlaces 		= [ 0, 1, 2 ];
+		var line			= -1;
+		
+		for( var i = lastLineArray.length-1; i >= 0; i-- )
+		{
+			if ( lastLineArray[i] || lastLineArray[i] != null )
+				freePlaces.splice(i,1);
+		}
+		
+		if ( freePlaces.length === 0 && lastLineArray.indexOf(actualObject) < 0 )
+			floor++;
+		
+		
+		var selectedLine = gameBoard.actualSelection.line;
+		if ( freePlaces.length > 0 )
+		{
+			switch( direction )
+			{
+				case 0 : selectedLine++; break;	// up
+				case 1 : selectedLine--; break;	// left
+				case 2 : selectedLine--; break;	// down
+				case 3 : selectedLine++; break;	// right
+			}
+			
+			
+			for( var i = freePlaces.length-1; i >= 0; i-- )
+			{
+				if ( freePlaces[i] === selectedLine )
+					line = freePlaces[i];
+			}
+			
+			if ( line < 0 )
+			{
+				if ( direction === 1 || direction === 2 )
+					line = freePlaces[freePlaces.length-1];
+				else
+					line = freePlaces[0];
+			}
+			
+		} else if ( lastLineArray.indexOf(actualObject) < 0 ){
+			line = 1;
+		} else {
+			line = lastLineArray.indexOf(actualObject);
+		}
+		
+		gameBoard.place( floor, line );
+	}, 
+		
+	place : function( floor, line  ){
 	
-	scene.simulate( 1.5, 5 );
+		var vector = new THREE.Vector3;
+		vector.x = ( floor % 2 === 0 ) ? line * gameBoard.CUBE_DIMENSIONS.w - ( gameBoard.CUBE_DIMENSIONS.w * 1.5 ) : -gameBoard.CUBE_DIMENSIONS.w /2;
+		vector.y = gameBoard.CUBE_DIMENSIONS.h/2 + ( gameBoard.CUBE_DIMENSIONS.h*1*floor );
+		vector.z = ( floor % 2 === 0 ) ? 0 : line * gameBoard.CUBE_DIMENSIONS.w - ( gameBoard.CUBE_DIMENSIONS.w ) ;
+		
+		var actualObject = gameBoard.objects[ gameBoard.actualSelection.floor ][ gameBoard.actualSelection.line ];
+		
+		gameBoard.scene.remove( actualObject );
+		actualObject.position.x = vector.x;
+		actualObject.position.y = vector.y;
+		actualObject.position.z = vector.z;
+		
+		actualObject.rotation.x = 0;
+		actualObject.rotation.y = ( floor % 2 === 0 ) ? 0 : Math.PI / 2.01;
+		actualObject.rotation.z = 0;
+		
+		actualObject.__dirtyRotation = true;
+		actualObject.__dirtyPosition = true;
+		
+		
+		gameBoard.objects[ gameBoard.actualSelection.floor ][ gameBoard.actualSelection.line ] = null;
+		
+		if ( floor >= gameBoard.objects.length )
+			gameBoard.objects[floor] = [];
+		
+		gameBoard.objects[ floor ][ line ] = actualObject;
+		gameBoard.actualSelection.floor = floor;
+		gameBoard.actualSelection.line = line;
+		
+		gameBoard.scene.add( actualObject );
+	}  
+})
 
-	renderer.render( scene, camera );
-}
+var gameBoard = new GameBoardClass();

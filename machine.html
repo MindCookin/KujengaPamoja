@@ -50,14 +50,13 @@
 		
 		<div id="game_wrapper" class="box-shadowed">
 		
-			<!-------------------------------------- INITIAL SCREEN
+			<!-------------------------------------- INITIAL SCREEN -->
 			<div id="initial_screen" class="popup box-shadowed">
 				<p>block FIESTA is an interactive experience to play with your friends. Open Google chrome in your smartphones and go to:</p>
 				<p class="align-center"><a href="#" class="url">veryverylongurlwithallthegetparameters</a></p>
 				<p>when you are done just click play</p>
 				<a class="btnPlay box-shadowed">PLAY</a>
 			</div>
-			-->
 			<!-------------------------------------- STATS SCREEN
 			<div id="stats_screen" class="popup box-shadowed">
 				<h3 class="align-center">STATS</h3>
@@ -74,7 +73,7 @@
 			<!-------------------------------------- INFO SCREEN -->
 			<div id="info_screen" class="popup box-shadowed green">
 				<p>pasdpokpokapos dkpokpokas dppaoks auij pjoij oiajs doijpoiaj doisjpoaisj doijaps d</p>
-			</div>
+			</div> 
 			
 		</div>
 		
@@ -94,6 +93,9 @@
 				
 			$( function(){
 			
+				gameBoard.start();
+				gameBoard.animate();
+
 				machine.start();
 			
 				TweenMax.delayedCall( .1, connections.initialize, [ '{{ token }}' ] );

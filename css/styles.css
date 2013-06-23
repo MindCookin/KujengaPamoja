@@ -28,14 +28,14 @@ h1 { margin : 19px auto; text-align: center; font: 70px 'CommandoCommando', Aria
 	.popup p{}
 	.popup h3, .popup a.url{ color:#e7ac04; text-shadow: 3px 3px #000000;}
 	.popup a.url:hover{ color:#e3db04;}
-	.popup  a.btnPlay { display : block; padding: 20px; text-align:center; font-size : 50px; background:#3ba915; width: 180px; margin : 10px auto; cursor:pointer; }
+	.popup  a.btnPlay { display : block; padding: 20px; text-align:center; font-size : 50px; background:#3ba915; width: 180px; margin : 10px auto; cursor:pointer; visibility : hidden }
 	.popup  a.btnPlay:hover { color:#3ba915; background : #FFFFFF; }
 	
 #initial_screen {}
 #stats_screen{}
 	#stats_screen  a.btnPlay { width : 250px; }
 	
-#info_screen{ margin : 500px 60px 0px; width : 700px;  padding : 0px 20px; }
+#info_screen{ margin : 500px 60px 0px; width : 700px;  padding : 0px 20px; visibility:hidden }
 	#info_screen.red{ background:#a91515; }
 	#info_screen.green{ background:#3ba915; }
 	#info_screen.blue{ background:#1561a9; }
@@ -50,17 +50,17 @@ body.player.green{ background:#3ba915; }
 body.player.blue{ background:#1561a9; }
 body.player.yellow{ background:#e7ac04; }
 
-#board_wrapper {	position:relative; text-align: center;} 
-	#board_wrapper h1 { 
+#player_wrapper {	position:relative; text-align: center;} 
+	#player_wrapper h1 { 
 		font: 60px/68px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0;
 		color: black;
 		text-shadow:
 			2px 2px 0 #fff;  
 	}
 
-#board { position: relative;	margin	: 20px auto; width : 225px; }
-	#board a { background : #000000; box-shadow: 3px 3px 0px #FFFFFF; display: block; position : absolute; text-indent:-10000px; overflow:hidden; }
-	#board a:active { background : #000000; box-shadow: 1px 1px 0px #FFFFFF; margin : 2px; }
+#playerButtons { position: relative;	margin	: 20px auto; width : 225px; visibility : hidden }
+	#playerButtons a { background : #000000; box-shadow: 3px 3px 0px #FFFFFF; display: block; position : absolute; text-indent:-10000px; overflow:hidden; }
+	#playerButtons a:active { background : #000000; box-shadow: 1px 1px 0px #FFFFFF; margin : 2px; }
 	
 .btnArrow { height	: 50px; width : 50px; }
 	#btnUp { top : 0px; left : 90px; /*background : url('../images/upArrow.png') no-repeat center center;*/ }

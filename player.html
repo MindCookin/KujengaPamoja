@@ -38,7 +38,7 @@
 	</head>
 
 	<body class="player {% if user1 == me %} red {% elif user2 == me %} green {% elif user3 == me %} blue {% elif user4 == me %} yellow {% endif %}">
-		<div id="board_wrapper">
+		<div id="player_wrapper">
 			<h1>
 				{% if user1 	== me %} Player 1
 				{% elif user2 	== me %} Player 2
@@ -47,7 +47,7 @@
 				{% endif %}
 			</h1>
 	
-			<div id='board'>
+			<div id="playerButtons">
 				<a id="btnUp" class="btnArrow">UP</a>
 				<a id="btnDown" class="btnArrow">DOWN</a>
 				<a id="btnLeft" class="btnArrow">LEFT</a>
@@ -61,11 +61,8 @@
 		connections.game_key 	= '{{ game_key }}';
 		connections.me			= '{{ me }}';
 		
-		console.log( "asdasdas", connections.game_key, connections.me )
-		
 		$( function(){
 			player.start();
-		
 			TweenMax.delayedCall( .1, connections.initialize, [ '{{ token }}' ] );
 		});
 	</script>

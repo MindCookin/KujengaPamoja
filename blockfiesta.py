@@ -77,12 +77,49 @@ class Pressed(webapp2.RequestHandler):
 		user = users.get_current_user()
 
 		if game and user:
+			keyPressed = int( self.request.get('press') )
+			if keyPressed < 4 :
+				game.press = keyPressed
+				game.put()
+				GameUpdater(game).send_update()
+			else :
+				game.press = -1
+				game.state = game.state+1;
+				game.put()
+				GameUpdater(game).send_update()
+
+class Released(webapp2.RequestHandler):
+
+	def post(self):
+		game = GameFromRequest(self.request).get_game()
+		user = users.get_current_user()
+
+		if game and user:
+			game.press = -1;
+			game.put()
 			GameUpdater(game).send_update()
 	
 class Opened(webapp2.RequestHandler):
 
 	def post(self):
 		game = GameFromRequest(self.request).get_game()
+		GameUpdater(game).send_update()
+
+class StartGame(webapp2.RequestHandler):
+
+	def post(self):
+		game = GameFromRequest(self.request).get_game()
+		game.state = 2;
+		game.active = game.user1;
+		game.put()
+		GameUpdater(game).send_update()
+		
+class Activated(webapp2.RequestHandler):
+
+	def post(self):
+		game = GameFromRequest(self.request).get_game()
+		game.state = 3;
+		game.put()
 		GameUpdater(game).send_update()
 
 class Main(webapp2.RequestHandler):
@@ -162,5 +199,8 @@ class Main(webapp2.RequestHandler):
 application = webapp2.WSGIApplication([
     ('/', Main),
     ('/opened', Opened),
+    ('/startGame', StartGame),
+    ('/released', Released),
+    ('/activated', Activated),
     ('/pressed', Pressed)
 ], debug=True)
