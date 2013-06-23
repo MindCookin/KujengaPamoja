@@ -15,17 +15,15 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 
 class Game(db.Model):
 	"""All the data we store for a game"""
+	machine = db.StringProperty()
 	user1 	= db.StringProperty()
 	user2 	= db.StringProperty()
 	user3 	= db.StringProperty()
 	user4 	= db.StringProperty()
-	machine = db.StringProperty()
 	active  = db.StringProperty()
-	row		= db.StringProperty()
-	col		= db.StringProperty()
-	x		= db.StringProperty()
-	y		= db.StringProperty()
-	z		= db.StringProperty()
+	press  	= db.IntegerProperty()
+	loose  	= db.BooleanProperty()
+	state  	= db.IntegerProperty()
 
 class GameUpdater():
   game = None
@@ -35,17 +33,15 @@ class GameUpdater():
 
   def get_game_message(self):
     gameUpdate = {
+		"machine" 	: self.game.machine,
 		"user1" 	: '' if not self.game.user1 else self.game.user1,
 		"user2" 	: '' if not self.game.user2 else self.game.user2,
 		"user3" 	: '' if not self.game.user3 else self.game.user3,
 		"user4" 	: '' if not self.game.user4 else self.game.user4,
-		"machine" 	: self.game.machine,
 		"active" 	: self.game.active,
-		"row" 		: self.game.row,
-		"col" 		: self.game.col,
-		"x" 		: self.game.x,
-		"y" 		: self.game.y,
-		"z" 		: self.game.z,
+		"press"  	: self.game.press,
+		"loose"  	: self.game.loose,
+		"state"  	: self.game.state
     }
     return json.dumps(gameUpdate)
 
@@ -74,23 +70,22 @@ class GameFromRequest():
 	def get_game(self):
 		return self.game
 
-class SelectedPage(webapp2.RequestHandler):
+class Pressed(webapp2.RequestHandler):
 
 	def post(self):
 		game = GameFromRequest(self.request).get_game()
 		user = users.get_current_user()
 
 		if game and user:
-			game.active = self.request.get("sender");
 			GameUpdater(game).send_update()
 	
-class OpenedPage(webapp2.RequestHandler):
+class Opened(webapp2.RequestHandler):
 
 	def post(self):
 		game = GameFromRequest(self.request).get_game()
-#		GameUpdater(game).send_update()
+		GameUpdater(game).send_update()
 
-class MainPage(webapp2.RequestHandler):
+class Main(webapp2.RequestHandler):
 
     def get(self):
 		
@@ -107,38 +102,40 @@ class MainPage(webapp2.RequestHandler):
 		user_id = user.user_id()
 		
 		if not game_key :
-		
 			# TODO : generar game_key dinamicamente
 			game_key = "x7fgh2"
 			
 			# y creo un nuevo Game
 			game = Game(
 				key_name = game_key,
-				machine = user_id
+				machine = user_id,
+				state	= 0
 			)
 			game.put()
-		else : 
+		else :
 		
 			# recojo el Game
 			game = Game.get_by_key_name(game_key)
 			
-			# TODO enviar a pagina que avise
-			if user_id == game.user1 or user_id == game.user2 or user_id == game.user3 or user_id == game.user4:
-				return
-			
-			# creo el usuario dependiendo de cuantos usuarios haya conectados
-			if not game.user1 :
-				game.user1 = user_id
-				game.put()
-			elif not game.user2 :
-				game.user2 = user_id
-				game.put()
-			elif not game.user3 :
-				game.user3 = user_id
-				game.put()
-			elif not game.user4 :
-				game.user4 = user_id
-				game.put()
+			#compruebo si existe usuario
+			if user_id != game.user1 or user_id != game.user2 or user_id != game.user3 or user_id != game.user4 :
+				# creo el usuario si no existe
+				if not game.user1 :
+					game.state = 1
+					game.user1 = user_id
+					game.put()
+				elif not game.user2 :
+					game.state = 1
+					game.user2 = user_id
+					game.put()
+				elif not game.user3 :
+					game.state = 1
+					game.user3 = user_id
+					game.put()
+				elif not game.user4 :
+					game.state = 1
+					game.user4 = user_id
+					game.put()
 		
 		#recojo el token
 		token = channel.create_channel( user_id + game_key )
@@ -153,16 +150,17 @@ class MainPage(webapp2.RequestHandler):
 			'user3': 	game.user3,
 			'user4': 	game.user4,
 			'me': user_id
-#			'game_link': game_link,
-#			'initial_message': GameUpdater(game).get_game_message()
 		}
 		
-		template = JINJA_ENVIRONMENT.get_template('index.html')
-		self.response.write(template.render(template_values))
-
+		if self.request.get('g'):
+			template = JINJA_ENVIRONMENT.get_template('player.html')
+			self.response.write(template.render(template_values))
+		else:
+			template = JINJA_ENVIRONMENT.get_template('machine.html')
+			self.response.write(template.render(template_values))
 			
 application = webapp2.WSGIApplication([
-    ('/', MainPage),
-    ('/opened', OpenedPage),
-    ('/selected', SelectedPage)
+    ('/', Main),
+    ('/opened', Opened),
+    ('/pressed', Pressed)
 ], debug=True)

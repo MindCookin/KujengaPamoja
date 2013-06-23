@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% autoescape true %}
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
@@ -18,14 +19,34 @@
 		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 		
 		<!-- SCRIPTS -->
+		<script type="text/javascript" src='/_ah/channel/jsapi'></script>
+		
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+		<script type="text/javascript" src="js/libs/modernizr.js"></script>
+		<script type="text/javascript" src='/js/libs/greensock/TweenMax.min.js'></script>
+		
+		<script type="text/javascript" src="js/core.js"></script>
+		<script type="text/javascript" src="js/utils/EventBus.js"></script>
+		<script type="text/javascript" src="js/connections.js"></script>
+		<script type="text/javascript" src="js/game_states.js"></script>
+		<script type="text/javascript" src="js/player.js"></script>
+		
+		<!-- STYLESHEETS -->
 		<link rel="stylesheet" href="css/fonts.css" type="text/css" charset="utf-8"/>
 		<link rel="stylesheet" href="css/styles.css" type="text/css" charset="utf-8"/>
 
 	</head>
 
-	<body class="player green">
+	<body class="player {% if user1 == me %} red {% elif user2 == me %} green {% elif user3 == me %} blue {% elif user4 == me %} yellow {% endif %}">
 		<div id="board_wrapper">
-			<h1>Info</h1>
+			<h1>
+				{% if user1 	== me %} Player 1
+				{% elif user2 	== me %} Player 2
+				{% elif user3 	== me %} Player 3
+				{% elif user4 	== me %} Player 4
+				{% endif %}
+			</h1>
+	
 			<div id='board'>
 				<a id="btnUp" class="btnArrow">UP</a>
 				<a id="btnDown" class="btnArrow">DOWN</a>
@@ -34,5 +55,20 @@
 				<a id="btnOK" class="btnCenter">OK</a>
 			</div>
 		</div>
+	
+	<script type="text/javascript">
+	
+		connections.game_key 	= '{{ game_key }}';
+		connections.me			= '{{ me }}';
+		
+		console.log( "asdasdas", connections.game_key, connections.me )
+		
+		$( function(){
+			player.start();
+		
+			TweenMax.delayedCall( .1, connections.initialize, [ '{{ token }}' ] );
+		});
+	</script>
 	</body>
 </html>
+{% endautoescape %}

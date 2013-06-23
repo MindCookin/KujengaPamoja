@@ -43,6 +43,7 @@ function init() {
 	camera.lookAt( new THREE.Vector3( 0, 200, 0 ) );
 
 	controls = new THREE.TrackballControls( camera );
+	controls.enabled = false;
 	controls.rotateSpeed = 1.0;
 	controls.zoomSpeed = 1.2;
 	controls.panSpeed = 0.8;
@@ -132,9 +133,9 @@ function init() {
 	physics_stats.domElement.style.zIndex = 100;
 	container.appendChild( physics_stats.domElement );
 		
-	renderer.domElement.addEventListener( 'mousemove', onDocumentMouseMove, false );
-	renderer.domElement.addEventListener( 'mousedown', onDocumentMouseDown, false );
-	renderer.domElement.addEventListener( 'mouseup', onDocumentMouseUp, false );
+//	renderer.domElement.addEventListener( 'mousemove', onDocumentMouseMove, false );
+//	renderer.domElement.addEventListener( 'mousedown', onDocumentMouseDown, false );
+//	renderer.domElement.addEventListener( 'mouseup', onDocumentMouseUp, false );
 
 	window.addEventListener( 'resize', onWindowResize, false );
 

@@ -12,13 +12,13 @@ h1 { margin : 19px auto; text-align: center; font: 70px 'CommandoCommando', Aria
 #game_wrapper { background:#FFFFFF; width:900px; height: 700px; margin: 15px auto 0 auto; position:relative; }
 #console {background : #000000; color: #FFFFFF; }
 
-#sidebar { position : absolute; top : 20%; left : 0px; list-style : none; margin : 0; padding : 0; z-index : 100; }
-	#sidebar li { display:block; margin-bottom: 20px; padding: 10px; width: 200px; font: 30px/32px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; color: white;   background: url('../images/mobile-icon.png') 175px center no-repeat; margin-left : -150px; }
-	#sidebar li.active{  margin-left : 0; } 
-	#sidebar li.red{ background-color:#a91515; }
-	#sidebar li.green{ background-color:#3ba915; }
-	#sidebar li.blue{ background-color:#1561a9; }
-	#sidebar li.yellow{ background-color:#e7ac04; }
+#playersSidebar { position : absolute; top : 20%; left : 0px; list-style : none; margin : 0; padding : 0; z-index : 100; }
+	#playersSidebar li { display:block; margin-bottom: 20px; padding: 10px; width: 200px; font: 30px/32px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; color: white;   background: url('../images/mobile-icon.png') 175px center no-repeat; margin-left : -150px; }
+	#playersSidebar li.active{  margin-left : 0; } 
+	#playersSidebar li.red{ background-color:#a91515; }
+	#playersSidebar li.green{ background-color:#3ba915; }
+	#playersSidebar li.blue{ background-color:#1561a9; }
+	#playersSidebar li.yellow{ background-color:#e7ac04; }
 
 #footer { position : absolute; bottom: 0; left : 0; overflow : hidden; padding:0; margin : 0; width:100%;}
 	#footer a { display:block; background: black; color: white; font: 20px/32px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; padding : 5px; text-align:center; margin : 0; text-decoration : none;}

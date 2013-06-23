@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% autoescape true %}
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
@@ -18,28 +19,38 @@
 		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 		
 		<!-- SCRIPTS -->
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-		<script src="js/libs/modernizr.js"></script>
-		<script src="js/libs/three.min.js"></script>
-		<script src="js/libs/physi.js"></script>
-		<script src="js/libs/stats.min.js"></script>
-		<script src="js/controls/TrackballControls.js"></script>
-		<script src="js/game.js"></script>
+		<script type="text/javascript" src='/_ah/channel/jsapi'></script>
+		
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+		<script type="text/javascript" src="js/libs/modernizr.js"></script>
+		<script type="text/javascript" src="js/libs/three.min.js"></script>
+		<script type="text/javascript" src="js/libs/physi.js"></script>
+		<script type="text/javascript" src="js/libs/stats.min.js"></script>
+		<script type="text/javascript" src="js/controls/TrackballControls.js"></script>
+		<script type="text/javascript" src='/js/libs/greensock/TweenMax.min.js'></script>
+		
+		<script type="text/javascript" src="js/core.js"></script>
+		<script type="text/javascript" src="js/utils/EventBus.js"></script>
+		<script type="text/javascript" src="js/connections.js"></script>
+		<script type="text/javascript" src="js/game_board.js"></script>
+		<script type="text/javascript" src="js/game_states.js"></script>
+		<script type="text/javascript" src="js/machine.js"></script>
 
-		<!-- SCRIPTS -->
+		<!-- STYLESHEETS -->
 		<link rel="stylesheet" href="css/fonts.css" type="text/css" charset="utf-8"/>
 		<link rel="stylesheet" href="css/styles.css" type="text/css" charset="utf-8"/>
 
 	</head>
 
 	<body class="machine">
-		<h1>BLOCK FIESTA</h1>
+	
+		<h1>Block Fiesta</h1>
 		
 		<p id="console" style="position:absolute; right:10px">Conosole</p>
 		
 		<div id="game_wrapper" class="box-shadowed">
 		
-			<!--
+			<!-------------------------------------- INITIAL SCREEN
 			<div id="initial_screen" class="popup box-shadowed">
 				<p>block FIESTA is an interactive experience to play with your friends. Open Google chrome in your smartphones and go to:</p>
 				<p class="align-center"><a href="#" class="url">veryverylongurlwithallthegetparameters</a></p>
@@ -47,7 +58,7 @@
 				<a class="btnPlay box-shadowed">PLAY</a>
 			</div>
 			-->
-			<!--
+			<!-------------------------------------- STATS SCREEN
 			<div id="stats_screen" class="popup box-shadowed">
 				<h3 class="align-center">STATS</h3>
 				<p>	red PLayer made XX moves and put XX pieces<br/>
@@ -60,19 +71,34 @@
 				<a class="btnPlay box-shadowed">PLAY AGAIN</a>
 			</div>
 			-->
+			<!-------------------------------------- INFO SCREEN -->
 			<div id="info_screen" class="popup box-shadowed green">
 				<p>pasdpokpokapos dkpokpokas dppaoks auij pjoij oiajs doijpoiaj doisjpoaisj doijaps d</p>
 			</div>
 			
 		</div>
 		
-		<ul id="sidebar">
-			<li class="red active box-shadowed">Player Connected</li>
+		<ul id="playersSidebar">
+			<li class="red box-shadowed">Player Connected</li>
 			<li class="green box-shadowed">Player Connected</li>
 			<li class="blue box-shadowed">Player Connected</li>
 			<li class="yellow box-shadowed">Player Connected</li>
 		</ul>
 		
 		<div id="footer"><a href="#">&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS</a></div>
+	
+		<script type="text/javascript">
+			
+			connections.game_key 	= '{{ game_key }}';
+			connections.me			= '{{ me }}';
+				
+			$( function(){
+			
+				machine.start();
+			
+				TweenMax.delayedCall( .1, connections.initialize, [ '{{ token }}' ] );
+			});
+		</script>
 	</body>
 </html>
+{% endautoescape %}
