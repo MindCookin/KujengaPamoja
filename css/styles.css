@@ -6,36 +6,39 @@
 /****************			MACHINE			***********************/
 /******************************************************************/
 body.machine{ background: url('../images/background.png'); }
+body.machine.red{ background: url('../images/background-red.png'); }
+body.machine.green{ background: url('../images/background-green.png'); }
+body.machine.blue{ background: url('../images/background-blue.png'); }
+body.machine.yellow{ background: url('../images/background-yellow.png'); }
 
 h1 { margin : 19px auto; text-align: center; font: 70px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; color: white; text-shadow: 10px 10px #000000; }
 
-#game_wrapper { background:#FFFFFF; width:900px; height: 700px; margin: 15px auto 0 auto; position:relative; }
-#console {background : #000000; color: #FFFFFF; }
+#game_wrapper { background:#FFFFFF; width:900px; height: 500px; margin: 15px auto 0 auto; position:relative; }
 
 #playersSidebar { position : absolute; top : 20%; left : 0px; list-style : none; margin : 0; padding : 0; z-index : 100; }
-	#playersSidebar li { display:block; margin-bottom: 20px; padding: 10px; width: 200px; font: 30px/32px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; color: white;   background: url('../images/mobile-icon.png') 175px center no-repeat; margin-left : -150px; }
+	#playersSidebar li { display:block; margin-bottom: 20px; padding: 10px 45px 10px 10px; width: 165px; font: 30px/32px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; color: white;   background: url('../images/mobile-icon.png') 175px center no-repeat; margin-left : -150px; }
 	#playersSidebar li.active{  margin-left : 0; } 
 	#playersSidebar li.red{ background-color:#a91515; }
 	#playersSidebar li.green{ background-color:#3ba915; }
 	#playersSidebar li.blue{ background-color:#1561a9; }
 	#playersSidebar li.yellow{ background-color:#e7ac04; }
 
-#footer { position : absolute; bottom: 0; left : 0; overflow : hidden; padding:0; margin : 0; width:100%;}
+#footer { position : fixed; bottom: 0; left : 0; overflow : hidden; padding:0; margin : 0; width:100%;}
 	#footer a { display:block; background: black; color: white; font: 20px/32px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; padding : 5px; text-align:center; margin : 0; text-decoration : none;}
 	#footer a:hover {background: white; color: black;}
 
-.popup { margin : 80px 160px 0px; padding : 0px 20px 30px; color:white; font: 20px/25px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; position : absolute; top: 50px; left : 10px; z-index : 110; background: #a91515 url('../images/bgPixelLine.png') bottom left repeat-x; width:500px; }	
+.popup { margin : 10px 160px 0px; padding : 0px 20px 30px; color:white; font: 20px/25px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; position : absolute; top: 50px; left : 10px; z-index : 110; background: #a91515 url('../images/bgPixelLine.png') bottom left repeat-x; width:500px; }	
 	.popup p{}
 	.popup h3, .popup a.url{ color:#e7ac04; text-shadow: 3px 3px #000000;}
 	.popup a.url:hover{ color:#e3db04;}
-	.popup  a.btnPlay { display : block; padding: 20px; text-align:center; font-size : 50px; background:#3ba915; width: 180px; margin : 10px auto; cursor:pointer; visibility : hidden }
+	.popup  a.btnPlay { display : none; padding: 20px; text-align:center; font-size : 50px; background:#3ba915; width: 180px; margin : 10px auto; cursor:pointer; visibility : hidden }
 	.popup  a.btnPlay:hover { color:#3ba915; background : #FFFFFF; }
 	
 #initial_screen {}
-#stats_screen{}
+#stats_screen{ visibility : hidden; }
 	#stats_screen  a.btnPlay { width : 250px; }
 	
-#info_screen{ margin : 500px 60px 0px; width : 700px;  padding : 0px 20px; visibility:hidden }
+#info_screen{ margin : 350px 60px 0px; width : 700px;  padding : 0px 20px; visibility:hidden }
 	#info_screen.red{ background:#a91515; }
 	#info_screen.green{ background:#3ba915; }
 	#info_screen.blue{ background:#1561a9; }
@@ -51,12 +54,7 @@ body.player.blue{ background:#1561a9; }
 body.player.yellow{ background:#e7ac04; }
 
 #player_wrapper {	position:relative; text-align: center;} 
-	#player_wrapper h1 { 
-		font: 60px/68px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0;
-		color: black;
-		text-shadow:
-			2px 2px 0 #fff;  
-	}
+	#player_wrapper h1 { font: 60px/40px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; color: black; text-shadow:	2px 2px 0 #fff; }
 
 #playerButtons { position: relative;	margin	: 20px auto; width : 225px; visibility : hidden }
 	#playerButtons a { background : #000000; box-shadow: 3px 3px 0px #FFFFFF; display: block; position : absolute; text-indent:-10000px; overflow:hidden; }
@@ -68,7 +66,7 @@ body.player.yellow{ background:#e7ac04; }
 	#btnDown { top : 170px; left : 90px; /*background : url('../images/downArrow.png') no-repeat center center;*/  }
 	#btnRight { top : 90px; left : 170px; /*background : url('../images/rightArrow.png') no-repeat center center;*/  }
 
-.btnCenter { /*background : url('../images/btnCenter.png') no-repeat center center;*/ height : 75px; width	: 75px; top : 75px; left : 75px; }
+#playerButtons a.btnCenter { font: 30px/80px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; color: white; text-shadow:	2px 2px 0 #000;  height : 75px; width	: 75px; top : 75px; left : 75px; text-indent:0px; }
 
 /******************************************************************/
 /****************			GLOBAL			***********************/

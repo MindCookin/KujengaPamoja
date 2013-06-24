@@ -4,11 +4,14 @@ PlayerClass = Class.extend({
 
 	press : function( event ) {
 		
-		if ( connections.data.state >= PLAY_SELECT && connections.data.active == connections.me )
+		if ( connections.data.state >= PLAY_SELECT )
 		{
-			var data = 	'sender='	+ connections.me + '&' +
-						'press='	+ player.playerButtonKeys[event.currentTarget.id];
-			connections.sendMessage('/pressed', data);
+			if ( connections.data.active == connections.me )
+			{
+				var data = 	'sender='	+ connections.me + '&' +
+							'press='	+ player.playerButtonKeys[event.currentTarget.id];
+				connections.sendMessage('/pressed', data);
+			}
 		}
 		
 		return false;
@@ -26,14 +29,37 @@ PlayerClass = Class.extend({
 	
 		console.log( "ON MESSAGE PLAYER!!!!")
 		
-		if ( connections.data.state == PLAY_SET_ACTIVE && connections.data.active == connections.me )
+		if ( connections.data.state == PLAY_STARTGAME )
 		{
-			var keys = Object.keys(player.playerButtonKeys);
+			if( connections.data.active == connections.me )
+			{
+				$('h1').css( 'fontSize', '30px' );
+				$('h1').text(PLAYER_SELECT);
+				
+				player.showButtons();
+				connections.sendMessage('/activated');
+				
+			} else {
+				player.hideButtons();
+				$('h1').css( 'fontSize', '60px' );
+				$('h1').text( PLAYER_WAIT );
+			}
+		}
 		
-			for ( var i = 0; i < keys.length; i++ )
-				TweenMax.to( '#' + keys[i], .5, { scaleX : 1, scaleY : 1, autoAlpha : true, ease : "Power3.easeOut" } );
+		if ( connections.data.state == PLAY_MOVE && connections.data.active == connections.me )
+		{
+			$('h1').text(PLAYER_MOVE);
+			$('#btnOK').hide();
 			
-			connections.sendMessage('/activated');
+		} else if ( connections.data.state == PLAY_PLACE && connections.data.active == connections.me ) {
+		
+			$('h1').text(PLAYER_PLACE);
+			$('#btnOK').show();
+		}
+		
+		if ( connections.data.state == READY || connections.data.state == LOOSE )
+		{
+			player.hideButtons();
 		}
 	},
 
@@ -49,7 +75,30 @@ PlayerClass = Class.extend({
 		$('window').mouseup( player.press );
 		
 		connections.addEventListener("onMessage", player.onMessage );
+	},
+	
+	hideButtons : function(){
+	
+		var i, length;
+		var keys = Object.keys(player.playerButtonKeys);
+	
+		$('#playerButtons').removeClass("active");
+		
+		for ( i = 0; i < keys.length; i++ )
+			TweenMax.to( '#' + keys[i], .5, { scaleX : 0, scaleY : 0, ease : "Power3.easeOut", overwrite : 1 } );
+	},
+	
+	showButtons : function(){
+	
+		var i, length;
+		var keys = Object.keys(player.playerButtonKeys);
+		
+		$('#playerButtons').addClass("active");
+				
+		for ( i = 0; i < keys.length; i++ )
+			TweenMax.to( '#' + keys[i], .5, { scaleX : 1, scaleY : 1, autoAlpha : true, ease : "Power3.easeOut", overwrite : 1 } );
 	}
+	
 });
 
 var player = new PlayerClass();

@@ -28,7 +28,7 @@
 		<script type="text/javascript" src="js/core.js"></script>
 		<script type="text/javascript" src="js/utils/EventBus.js"></script>
 		<script type="text/javascript" src="js/connections.js"></script>
-		<script type="text/javascript" src="js/game_states.js"></script>
+		<script type="text/javascript" src="js/constants.js"></script>
 		<script type="text/javascript" src="js/player.js"></script>
 		
 		<!-- STYLESHEETS -->
@@ -40,10 +40,10 @@
 	<body class="player {% if user1 == me %} red {% elif user2 == me %} green {% elif user3 == me %} blue {% elif user4 == me %} yellow {% endif %}">
 		<div id="player_wrapper">
 			<h1>
-				{% if user1 	== me %} Player 1
-				{% elif user2 	== me %} Player 2
-				{% elif user3 	== me %} Player 3
-				{% elif user4 	== me %} Player 4
+				{% if user1 	== me %} WELCOME RED PLAYER
+				{% elif user2 	== me %} WELCOME GREEN PLAYER
+				{% elif user3 	== me %} WELCOME BLUE PLAYER
+				{% elif user4 	== me %} WELCOME YELLOE PLAYER
 				{% endif %}
 			</h1>
 	

@@ -1,28 +1,34 @@
 GameBoardClass = Class.extend({	
 
 	CUBE_DIMENSIONS : { w : 25, h : 15, d : 75 },
-	VIEWPORT_DIMENSIONS : { w : 900, h : 700 },
+	VIEWPORT_DIMENSIONS : { w : 0, h : 0 },
 
-	stats		: null, 
-	physics_stats:null,
+	stats		: null,
 	
 	camera		: null, 
-	controls	: null, 
+	cameraControls: null, 
 	scene		: null,
 	renderer	: null,
 	
-	objects 	: [],
+	checkedMove	: false,
+	haveLost	: false,
+	
 	actualSelection : { floor : 0, line : 0 },
+	
+	objects 	: [],
+	ground 			: null,
+	actualObject 	: null,
 
 	start : function() {
 	
 		Physijs.scripts.worker 	= 'js/libs/physijs_worker.js';
 		Physijs.scripts.ammo 	= 'ammo.js';
 
+		var i;
 		var container = document.getElementById( 'game_wrapper' );
 		
-//		document.body.appendChild( container );
-
+		gameBoard.VIEWPORT_DIMENSIONS = { w : $('#game_wrapper').width(), h : $('#game_wrapper').height() };
+		
 		gameBoard.renderer = new THREE.WebGLRenderer( { antialias: true } );
 		gameBoard.renderer.sortObjects = false;
 		gameBoard.renderer.setSize( gameBoard.VIEWPORT_DIMENSIONS.w, gameBoard.VIEWPORT_DIMENSIONS.h );
@@ -36,17 +42,12 @@ GameBoardClass = Class.extend({
 		gameBoard.camera.position.z = 250;
 		gameBoard.camera.position.y = 170;
 		gameBoard.camera.position.x = 120;
-		gameBoard.camera.lookAt( new THREE.Vector3( 0, 200, 0 ) );
 
-		gameBoard.controls = new THREE.TrackballControls( gameBoard.camera );
-		gameBoard.controls.enabled = false;
-		gameBoard.controls.rotateSpeed = 1.0;
-		gameBoard.controls.zoomSpeed = 1.2;
-		gameBoard.controls.panSpeed = 0.8;
-		gameBoard.controls.noZoom = false;
-		gameBoard.controls.noPan = false;
-		gameBoard.controls.staticMoving = true;
-		gameBoard.controls.dynamicDampingFactor = 0.3;
+		gameBoard.cameraControls = new THREE.OrbitControls( gameBoard.camera, gameBoard.renderer.domElement );
+//		gameBoard.cameraControls.autoRotate= true
+		gameBoard.cameraControls.maxPolarAngle = Math.PI/2.5;
+		gameBoard.cameraControls.maxDistance = 500;
+		gameBoard.cameraControls.minDistance = 50;
 
 		gameBoard.scene = new Physijs.Scene();
 
@@ -69,23 +70,62 @@ GameBoardClass = Class.extend({
 		gameBoard.scene.add( directionalLight );
 		
 		var groundGeom = new THREE.PlaneGeometry( 768, 768 );
-		var ground = new Physijs.BoxMesh( groundGeom, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
+		gameBoard.ground = new Physijs.BoxMesh( groundGeom, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
+		gameBoard.ground.name = "ground";
+		gameBoard.ground.rotation.x = -90*Math.PI/180;
+		gameBoard.ground.receiveShadow = true;
+		gameBoard.ground.__dirtyPosition = true;
+		gameBoard.scene.add( gameBoard.ground );
 		
-		ground.rotation.x = -90*Math.PI/180;
-		ground.receiveShadow = true;
-		ground.__dirtyPosition = true;
-		
-		gameBoard.scene.add( ground );
+		for ( i = 0; i < 4; i++ )
+		{
+			var wallGeom = new THREE.PlaneGeometry( 768, 768/2 );
+			var wall = new Physijs.BoxMesh( groundGeom, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
+			wall.position.y = 768/2;
+			
+			if ( i == 0 )
+			{
+				wall.position.x = 768/2;
+				wall.rotation.x = -90*Math.PI/180;
+				wall.rotation.y = -90*Math.PI/180;
+			} else if ( i == 1 )
+			{
+				wall.position.x = -768/2;
+				wall.rotation.x = -90*Math.PI/180;
+				wall.rotation.y = 90*Math.PI/180;
+			} else if ( i == 2 )
+			{
+				wall.position.z = -768/2;
+				wall.rotation.z = -90*Math.PI/180;
+			} else if ( i == 3 )
+			{
+				wall.position.z = 768/2;
+				wall.rotation.z = 90*Math.PI/180;
+				wall.rotation.y = 180*Math.PI/180;
+			}
+			wall.receiveShadow = true;
+			wall.__dirtyPosition = true;
+			gameBoard.scene.add( wall );
+		}
 
 		var geometry = new THREE.CubeGeometry( gameBoard.CUBE_DIMENSIONS.w, gameBoard.CUBE_DIMENSIONS.h, gameBoard.CUBE_DIMENSIONS.d );
-
-		for ( var i = 0; i < 19; i ++ ) {
+		for ( i = 0; i < 19; i ++ ) {
 
 			var floor 	= Math.floor(i/3);
 			var line 	= Math.floor(i%3);
 
-			var object = new Physijs.BoxMesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );	
+			var material = Physijs.createMaterial(
+				new THREE.MeshLambertMaterial({ color: Math.random() * 0xffffff }),
+				.6, // medium friction
+				.3 // low restitution
+			);
+			
+			//material =  new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } );
+				
+			var object = new Physijs.BoxMesh( geometry, material );	
 			object.material.ambient = object.material.color;
+			object.originalColor = object.material.color;
+			object.collisions = 0;	// important for collision handling
 
 			object.position.x = ( floor % 2 === 0 ) ? line * gameBoard.CUBE_DIMENSIONS.w - ( gameBoard.CUBE_DIMENSIONS.w * 1.5 ) : -gameBoard.CUBE_DIMENSIONS.w /2;
 			object.position.y = gameBoard.CUBE_DIMENSIONS.h/2 + ( gameBoard.CUBE_DIMENSIONS.h*1*floor );
@@ -107,27 +147,61 @@ GameBoardClass = Class.extend({
 			gameBoard.objects[ floor ][line] = object;
 		}
 
-		var info = document.createElement( 'div' );
-		info.style.position = 'absolute';
-		info.style.top = '10px';
-		info.style.width = '100%';
-		info.style.textAlign = 'center';
-		info.innerHTML = '<a href="http://threejs.org" target="_blank">three.js</a> webgl - draggable cubes';
-		container.appendChild( info );
-
 		gameBoard.stats = new Stats();
 		gameBoard.stats.domElement.style.position = 'absolute';
 		gameBoard.stats.domElement.style.top = '0px';
 		container.appendChild( gameBoard.stats.domElement );
-
-		gameBoard.physics_stats = new Stats();
-		gameBoard.physics_stats.domElement.style.position = 'absolute';
-		gameBoard.physics_stats.domElement.style.top = '50px';
-		gameBoard.physics_stats.domElement.style.zIndex = 99;
-		container.appendChild( gameBoard.physics_stats.domElement );
 	
 //		window.addEventListener( 'resize', gameBoard.onWindowResize, false );
+	},
+	
+	reset : function() {
+	
+		var block;
+		var floor, line, i, j;
+		var simpleArray = [];	
+		
+		for ( i = 0; i < gameBoard.objects.length; i++ ) {
+			for ( j = 0; j < 3; j++ ) {
+				block = gameBoard.objects[i][j];
+				
+				if ( block && block != null )
+				{
+					simpleArray.push( block );
+					gameBoard.scene.remove( block );
+				}
+			}
+		}
+		
+		gameBoard.objects = [];
+	
+		for ( i = 0; i < 19; i ++ ) {
+		
+				floor 	= Math.floor(i/3);
+				line 	= Math.floor(i%3);
 
+				block = simpleArray.pop();	
+				block.material.color 	= new THREE.Color( Math.random() * 0xffffff );
+				block.material.ambient 	= block.material.color;
+				block.originalColor 	= block.material.color;
+
+				block.position.x = ( floor % 2 === 0 ) ? line * gameBoard.CUBE_DIMENSIONS.w - ( gameBoard.CUBE_DIMENSIONS.w * 1.5 ) : -gameBoard.CUBE_DIMENSIONS.w /2;
+				block.position.y = gameBoard.CUBE_DIMENSIONS.h/2 + ( gameBoard.CUBE_DIMENSIONS.h*1*floor );
+				block.position.z = ( floor % 2 === 0 ) ? 0 : line * gameBoard.CUBE_DIMENSIONS.w - ( gameBoard.CUBE_DIMENSIONS.w ) ;
+
+				block.rotation.x = 0;
+				block.rotation.y = ( floor % 2 === 0 ) ? 0 : Math.PI / 2.01;
+				block.rotation.z = 0;
+				
+				block.__dirtyPosition = true;
+
+				gameBoard.scene.add( block );
+				
+				if ( !gameBoard.objects[ floor ] )
+					gameBoard.objects[ floor ] = [];
+				
+				gameBoard.objects[ floor ][line] = block;
+		}
 	},
 
 	onWindowResize : function() {
@@ -136,7 +210,6 @@ GameBoardClass = Class.extend({
 		gameBoard.camera.updateProjectionMatrix();
 
 		gameBoard.renderer.setSize( gameBoard.VIEWPORT_DIMENSIONS.w, gameBoard.VIEWPORT_DIMENSIONS.h );
-
 	},
 
 	animate : function() {
@@ -146,22 +219,29 @@ GameBoardClass = Class.extend({
 		gameBoard.render();
 		
 		gameBoard.stats.update();
-		gameBoard.physics_stats.update();
 	},
 
 	render : function() {
 		
 		directionalLight.position.copy( gameBoard.camera.position );
 		
-		gameBoard.controls.update();
-		
 		if ( connections.data.state != PLAY_PLACE )
 			gameBoard.scene.simulate( 1.5, 5 );
+			
+		if( gameBoard.ground._physijs.touches.length > 4 && !gameBoard.haveLost )
+			gameBoard.loose();
+		
+		if( connections.data.state == PLAY_MOVE && !gameBoard.checkedMove && !gameBoard.haveLost )
+			gameBoard.checkMove();
 
+		gameBoard.cameraControls.update();
+	
 		gameBoard.renderer.render( gameBoard.scene, gameBoard.camera );
 	},
 
 	handleSelection :function( direction ) {
+		
+		gameBoard.checkedMove = false;
 		
 		switch( direction )
 		{
@@ -171,10 +251,10 @@ GameBoardClass = Class.extend({
 			case 3 : gameBoard.actualSelection.line++; break;	// right
 		}
 		
-		if ( gameBoard.actualSelection.floor >= gameBoard.objects.length )
+		if ( gameBoard.actualSelection.floor >= gameBoard.objects.length - 1 )
 			gameBoard.actualSelection.floor = 0;
 		else if (  gameBoard.actualSelection.floor < 0 )
-			gameBoard.actualSelection.floor = gameBoard.objects.length - 1;
+			gameBoard.actualSelection.floor = gameBoard.objects.length - 2;
 			
 		var lineArray = gameBoard.objects[ gameBoard.actualSelection.floor ];	
 		if ( gameBoard.actualSelection.line >= lineArray.length )
@@ -187,17 +267,17 @@ GameBoardClass = Class.extend({
 	
 	select : function() {
 		
-		var actualObject = gameBoard.objects[ gameBoard.actualSelection.floor ][ gameBoard.actualSelection.line ];
-		actualObject.material.transparent 	= false;
-		actualObject.material.opacity 		= 1;
-		actualObject.castShadow 	= true;
-		actualObject.receiveShadow 	= true;
+		gameBoard.actualObject = gameBoard.objects[ gameBoard.actualSelection.floor ][ gameBoard.actualSelection.line ];
+		gameBoard.actualObject.material.transparent 	= false;
+		gameBoard.actualObject.material.opacity 		= 1;
+		gameBoard.actualObject.castShadow 	= true;
+		gameBoard.actualObject.receiveShadow 	= true;
 
 		for ( var i = 0; i < gameBoard.objects.length; i++ )
 		{
 			for (var j = 0; j < gameBoard.objects[i].length; j++ )
 			{
-				if ( gameBoard.objects[i][j] !=  actualObject )
+				if ( gameBoard.objects[i][j] && gameBoard.objects[i][j] !=  gameBoard.actualObject )
 				{
 					gameBoard.objects[i][j].material.transparent = true;
 					gameBoard.objects[i][j].material.opacity = .3;
@@ -211,7 +291,6 @@ GameBoardClass = Class.extend({
 	handleMove: function( direction ){
 		
 		var vector = new THREE.Vector3;
-		
 		switch( direction )
 		{
 			case 0 : vector.z = -40; break;	// up
@@ -225,13 +304,13 @@ GameBoardClass = Class.extend({
 		
 	move : function( vector ) 
 	{
-		var actualObject = gameBoard.objects[ gameBoard.actualSelection.floor ][ gameBoard.actualSelection.line ];
-		actualObject.setLinearVelocity( vector );
+//		gameBoard.actualObject = gameBoard.objects[ gameBoard.actualSelection.floor ][ gameBoard.actualSelection.line ];
+		gameBoard.actualObject.setLinearVelocity( vector );
 	}, 
 	
 	handlePlace : function( direction ){
 	
-		var actualObject = gameBoard.objects[ gameBoard.actualSelection.floor ][ gameBoard.actualSelection.line ];
+//		gameBoard.actualObject = gameBoard.objects[ gameBoard.actualSelection.floor ][ gameBoard.actualSelection.line ];
 		var lastLineArray 	= gameBoard.objects[ gameBoard.objects.length - 1 ];
 		var floor 			= gameBoard.objects.length - 1;
 		var freePlaces 		= [ 0, 1, 2 ];
@@ -243,7 +322,7 @@ GameBoardClass = Class.extend({
 				freePlaces.splice(i,1);
 		}
 		
-		if ( freePlaces.length === 0 && lastLineArray.indexOf(actualObject) < 0 )
+		if ( freePlaces.length === 0 && lastLineArray.indexOf(gameBoard.actualObject) < 0 )
 			floor++;
 		
 		
@@ -273,10 +352,10 @@ GameBoardClass = Class.extend({
 					line = freePlaces[0];
 			}
 			
-		} else if ( lastLineArray.indexOf(actualObject) < 0 ){
+		} else if ( lastLineArray.indexOf(gameBoard.actualObject) < 0 ){
 			line = 1;
 		} else {
-			line = lastLineArray.indexOf(actualObject);
+			return;
 		}
 		
 		gameBoard.place( floor, line );
@@ -289,32 +368,62 @@ GameBoardClass = Class.extend({
 		vector.y = gameBoard.CUBE_DIMENSIONS.h/2 + ( gameBoard.CUBE_DIMENSIONS.h*1*floor );
 		vector.z = ( floor % 2 === 0 ) ? 0 : line * gameBoard.CUBE_DIMENSIONS.w - ( gameBoard.CUBE_DIMENSIONS.w ) ;
 		
-		var actualObject = gameBoard.objects[ gameBoard.actualSelection.floor ][ gameBoard.actualSelection.line ];
+//		gameBoard.actualObject = gameBoard.objects[ gameBoard.actualSelection.floor ][ gameBoard.actualSelection.line ];
 		
-		gameBoard.scene.remove( actualObject );
-		actualObject.position.x = vector.x;
-		actualObject.position.y = vector.y;
-		actualObject.position.z = vector.z;
+		gameBoard.scene.remove( gameBoard.actualObject );
+		gameBoard.actualObject.position.x = vector.x;
+		gameBoard.actualObject.position.y = vector.y;
+		gameBoard.actualObject.position.z = vector.z;
 		
-		actualObject.rotation.x = 0;
-		actualObject.rotation.y = ( floor % 2 === 0 ) ? 0 : Math.PI / 2.01;
-		actualObject.rotation.z = 0;
+		gameBoard.actualObject.rotation.x = 0;
+		gameBoard.actualObject.rotation.y = ( floor % 2 === 0 ) ? 0 : Math.PI / 2.01;
+		gameBoard.actualObject.rotation.z = 0;
 		
-		actualObject.__dirtyRotation = true;
-		actualObject.__dirtyPosition = true;
+		gameBoard.actualObject.__dirtyRotation = true;
+		gameBoard.actualObject.__dirtyPosition = true;
 		
-		
-		gameBoard.objects[ gameBoard.actualSelection.floor ][ gameBoard.actualSelection.line ] = null;
+		gameBoard.objects[ gameBoard.actualSelection.floor ].splice( gameBoard.actualSelection.line, 1 );
 		
 		if ( floor >= gameBoard.objects.length )
 			gameBoard.objects[floor] = [];
 		
-		gameBoard.objects[ floor ][ line ] = actualObject;
+		gameBoard.objects[ floor ][ line ] = gameBoard.actualObject;
 		gameBoard.actualSelection.floor = floor;
 		gameBoard.actualSelection.line = line;
 		
-		gameBoard.scene.add( actualObject );
-	}  
+		gameBoard.scene.add( gameBoard.actualObject );
+	},
+	
+	checkMove : function(){
+	
+		if( gameBoard.actualObject._physijs.touches.length === 0 )
+		{
+			if( gameBoard.actualObject._physijs.linearVelocity.x === 0 &&
+				gameBoard.actualObject._physijs.linearVelocity.y === 0 &&
+				gameBoard.actualObject._physijs.linearVelocity.z === 0 &&
+				gameBoard.actualObject._physijs.angularVelocity.x === 0 &&
+				gameBoard.actualObject._physijs.angularVelocity.y === 0 &&
+				gameBoard.actualObject._physijs.angularVelocity.z === 0 )
+			{
+				console.log( "MOVE OK!!!!!!!!")
+				
+				gameBoard.checkedMove = true;
+				connections.sendMessage('/moveOK');
+			}
+		}
+	}, 
+	
+	clean : function(){
+		gameBoard.actualSelection 	= { floor : 0, line : 0 };
+		gameBoard.actualObject		= null;
+		gameBoard.select();
+	},
+	
+	loose : function(){
+		console.log( "TOUCHES::", gameBoard.ground._physijs.touches.length );
+		gameBoard.haveLost = true;
+		connections.sendMessage('/loose');
+	}
 })
 
 var gameBoard = new GameBoardClass();

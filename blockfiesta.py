@@ -8,6 +8,8 @@ from google.appengine.ext import db
 import json
 import jinja2
 import webapp2
+import string
+import random
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -84,10 +86,22 @@ class Pressed(webapp2.RequestHandler):
 				GameUpdater(game).send_update()
 			else :
 				game.press = -1
-				game.state = game.state+1;
+				game.state += 1
 				game.put()
 				GameUpdater(game).send_update()
 
+class MoveOK(webapp2.RequestHandler):
+
+	def post(self):
+		game = GameFromRequest(self.request).get_game()
+		user = users.get_current_user()
+
+		if game and user:
+			game.state += 1
+			game.put()
+			GameUpdater(game).send_update()
+
+				
 class Released(webapp2.RequestHandler):
 
 	def post(self):
@@ -109,8 +123,20 @@ class StartGame(webapp2.RequestHandler):
 
 	def post(self):
 		game = GameFromRequest(self.request).get_game()
-		game.state = 2;
-		game.active = game.user1;
+		game.state = 2
+		
+		usersList = [ game.user1, game.user2, game.user3, game.user4 ]
+		
+		if not game.active:
+			game.active = usersList[0]
+		else :
+			index = usersList.index( game.active ) + 1
+			
+			if index < len(usersList) and usersList[index] :
+				game.active = usersList[index]
+			else :
+				game.active = usersList[0]
+			
 		game.put()
 		GameUpdater(game).send_update()
 		
@@ -122,6 +148,14 @@ class Activated(webapp2.RequestHandler):
 		game.put()
 		GameUpdater(game).send_update()
 
+class Loose(webapp2.RequestHandler):
+
+	def post(self):
+		game = GameFromRequest(self.request).get_game()
+		game.state = 8;
+		game.put()
+		GameUpdater(game).send_update()
+		
 class Main(webapp2.RequestHandler):
 
     def get(self):
@@ -139,8 +173,8 @@ class Main(webapp2.RequestHandler):
 		user_id = user.user_id()
 		
 		if not game_key :
-			# TODO : generar game_key dinamicamente
-			game_key = "x7fgh2"
+			
+			game_key = id_generator()
 			
 			# y creo un nuevo Game
 			game = Game(
@@ -158,29 +192,30 @@ class Main(webapp2.RequestHandler):
 			if user_id != game.user1 or user_id != game.user2 or user_id != game.user3 or user_id != game.user4 :
 				# creo el usuario si no existe
 				if not game.user1 :
-					game.state = 1
 					game.user1 = user_id
-					game.put()
 				elif not game.user2 :
-					game.state = 1
 					game.user2 = user_id
-					game.put()
 				elif not game.user3 :
-					game.state = 1
 					game.user3 = user_id
-					game.put()
 				elif not game.user4 :
-					game.state = 1
 					game.user4 = user_id
-					game.put()
-		
+				
+				if game.state == 0:
+					game.state = 1
+					
+				game.put()
+				
 		#recojo el token
 		token = channel.create_channel( user_id + game_key )
+		
+		#creo la URL
+		game_url = "http://localhost:10080/?g=" + game_key
 		
 		# Actualizo el HTML:
 		template_values = {
 			'token': token,
 			'game_key': game_key,
+			'game_url': game_url,
 			'machine': 	game.machine,
 			'user1': 	game.user1,
 			'user2': 	game.user2,
@@ -196,11 +231,16 @@ class Main(webapp2.RequestHandler):
 			template = JINJA_ENVIRONMENT.get_template('machine.html')
 			self.response.write(template.render(template_values))
 			
+def id_generator(size = 6 , chars = string.ascii_uppercase + string.digits ):
+	return ''.join(random.choice(chars) for x in range(size))
+			
 application = webapp2.WSGIApplication([
     ('/', Main),
     ('/opened', Opened),
     ('/startGame', StartGame),
+    ('/pressed', Pressed),
     ('/released', Released),
     ('/activated', Activated),
-    ('/pressed', Pressed)
+    ('/loose', Loose),
+    ('/moveOK', MoveOK)
 ], debug=True)

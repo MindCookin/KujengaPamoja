@@ -8,7 +8,7 @@
 		Remove this if you use the .htaccess -->
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
-		<title>index</title>
+		<title>Block Fiesta</title>
 		<meta name="description" content="" />
 		<meta name="author" content="Yago" />
 
@@ -27,13 +27,14 @@
 		<script type="text/javascript" src="js/libs/physi.js"></script>
 		<script type="text/javascript" src="js/libs/stats.min.js"></script>
 		<script type="text/javascript" src="js/controls/TrackballControls.js"></script>
+		<script type="text/javascript" src="js/controls/OrbitControls.js"></script>
 		<script type="text/javascript" src='/js/libs/greensock/TweenMax.min.js'></script>
 		
 		<script type="text/javascript" src="js/core.js"></script>
 		<script type="text/javascript" src="js/utils/EventBus.js"></script>
 		<script type="text/javascript" src="js/connections.js"></script>
 		<script type="text/javascript" src="js/game_board.js"></script>
-		<script type="text/javascript" src="js/game_states.js"></script>
+		<script type="text/javascript" src="js/constants.js"></script>
 		<script type="text/javascript" src="js/machine.js"></script>
 
 		<!-- STYLESHEETS -->
@@ -46,18 +47,16 @@
 	
 		<h1>Block Fiesta</h1>
 		
-		<p id="console" style="position:absolute; right:10px">Conosole</p>
-		
 		<div id="game_wrapper" class="box-shadowed">
 		
 			<!-------------------------------------- INITIAL SCREEN -->
 			<div id="initial_screen" class="popup box-shadowed">
 				<p>block FIESTA is an interactive experience to play with your friends. Open Google chrome in your smartphones and go to:</p>
-				<p class="align-center"><a href="#" class="url">veryverylongurlwithallthegetparameters</a></p>
+				<p class="align-center"><a href="{{ game_url }}" class="url">{{ game_url }}</a></p>
 				<p>when you are done just click play</p>
 				<a class="btnPlay box-shadowed">PLAY</a>
 			</div>
-			<!-------------------------------------- STATS SCREEN
+			<!-------------------------------------- STATS SCREEN -->
 			<div id="stats_screen" class="popup box-shadowed">
 				<h3 class="align-center">STATS</h3>
 				<p>	red PLayer made XX moves and put XX pieces<br/>
@@ -69,7 +68,6 @@
 				</p>
 				<a class="btnPlay box-shadowed">PLAY AGAIN</a>
 			</div>
-			-->
 			<!-------------------------------------- INFO SCREEN -->
 			<div id="info_screen" class="popup box-shadowed green">
 				<p>pasdpokpokapos dkpokpokas dppaoks auij pjoij oiajs doijpoiaj doisjpoaisj doijaps d</p>
