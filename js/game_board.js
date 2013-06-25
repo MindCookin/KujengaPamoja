@@ -9,15 +9,22 @@ GameBoardClass = Class.extend({
 	cameraControls: null, 
 	scene		: null,
 	renderer	: null,
+	spotLight	: null,
+	pointLight	: null,
 	
+	checkedPlace: false,
 	checkedMove	: false,
 	haveLost	: false,
+	
+	looper : null,
 	
 	actualSelection : { floor : 0, line : 0 },
 	
 	objects 	: [],
 	ground 			: null,
 	actualObject 	: null,
+	
+	initialObjects : 19,
 
 	start : function() {
 	
@@ -35,7 +42,7 @@ GameBoardClass = Class.extend({
 		gameBoard.renderer.setSize( gameBoard.VIEWPORT_DIMENSIONS.w, gameBoard.VIEWPORT_DIMENSIONS.h );
 
 		gameBoard.renderer.shadowMapEnabled = true;
-		gameBoard.renderer.shadowMapType = THREE.PCFShadowMap;
+		gameBoard.renderer.shadowMapType 	= THREE.PCFShadowMap;
 
 		container.appendChild( gameBoard.renderer.domElement );
 
@@ -55,37 +62,51 @@ GameBoardClass = Class.extend({
 
 		gameBoard.scene = new Physijs.Scene();
 
-		gameBoard.scene.add( new THREE.AmbientLight( 0x333333 ) );
+		// LIGHTS
+		gameBoard.scene.add( new THREE.AmbientLight( 0x000000 ) );
 
-		directionalLight = new THREE.DirectionalLight( 0xffffff, 1.5 );
-		directionalLight.position.copy( gameBoard.camera.position );
-		directionalLight.castShadow = true;
-
-		directionalLight.shadowCameraNear = 200;
-		directionalLight.shadowCameraFar = gameBoard.camera.far;
-		directionalLight.shadowCameraFov = 50;
-
-		directionalLight.shadowBias = -0.00022;
-		directionalLight.shadowDarkness = 0.5;
-
-		directionalLight.shadowMapWidth = 1024;
-		directionalLight.shadowMapHeight = 1024;
-
-		gameBoard.scene.add( directionalLight );
+		var spotLight = new THREE.DirectionalLight( 0xffffff, 1.5 );
+		spotLight.position.copy( gameBoard.camera.position );
+		spotLight.position.setZ( 200 );
+		spotLight.castShadow = true;
+		spotLight.shadowCameraNear = 200;
+		spotLight.shadowCameraFar = gameBoard.camera.far;
+		spotLight.shadowCameraFov = 50;
+		spotLight.shadowBias = -0.00022;
+		spotLight.shadowDarkness = 0.5;
+		spotLight.shadowMapWidth = 1024;
+		spotLight.shadowMapHeight = 1024;
+		gameBoard.scene.add( spotLight );
+		
+		gameBoard.spotLight = new THREE.SpotLight( 0xddddff, 2.5 );
+		gameBoard.spotLight.castShadow = true;
+		gameBoard.spotLight.shadowCameraNear = gameBoard.camera.near;
+		gameBoard.spotLight.shadowCameraFar = gameBoard.camera.far;
+		gameBoard.spotLight.shadowCameraFov = 50;
+		gameBoard.spotLight.shadowBias = -0.00022;
+		gameBoard.spotLight.shadowDarkness = 0.5;
+		gameBoard.spotLight.shadowMapWidth = 1024;
+		gameBoard.spotLight.shadowMapHeight = 1024;
+		gameBoard.scene.add( gameBoard.spotLight );
+		
+		// GROUND
+//		materials.push( new THREE.MeshPhongMaterial( { ambient: 0x030303, color: 0xdddddd, specular: 0x009900, shininess: 30, shading: THREE.SmoothShading } ) );
 		
 		var groundGeom = new THREE.PlaneGeometry( 768, 768 );
-		gameBoard.ground = new Physijs.BoxMesh( groundGeom, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
+		gameBoard.ground = new Physijs.BoxMesh( groundGeom, new THREE.MeshPhongMaterial( { ambient: 0x030303, color: 0x9d5602, specular: 0x009900, shininess: 10, shading: THREE.SmoothShading } ) );
+		gameBoard.ground.material.ambient = gameBoard.ground.material.color;
 		gameBoard.ground.name = "ground";
 		gameBoard.ground.rotation.x = -90*Math.PI/180;
-		gameBoard.ground.receiveShadow = true;
+		gameBoard.ground.receiveShadow	 = true;
 		gameBoard.ground.__dirtyPosition = true;
 		gameBoard.scene.add( gameBoard.ground );
 		
 		for ( i = 0; i < 4; i++ )
 		{
 			var wallGeom = new THREE.PlaneGeometry( 768, 768/2 );
-			var wall = new Physijs.BoxMesh( groundGeom, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
+			var wall = new Physijs.BoxMesh( groundGeom, new THREE.MeshPhongMaterial( { ambient: 0x030303, color: gameBoard.getRandomColor(), specular: 0x009900, shininess: 10, shading: THREE.SmoothShading } ) );
 			wall.position.y = 768/2;
+			wall.material.ambient = 0x030303;
 			
 			if ( i == 0 )
 			{
@@ -113,19 +134,13 @@ GameBoardClass = Class.extend({
 		}
 
 		var geometry = new THREE.CubeGeometry( gameBoard.CUBE_DIMENSIONS.w, gameBoard.CUBE_DIMENSIONS.h, gameBoard.CUBE_DIMENSIONS.d );
-		for ( i = 0; i < 19; i ++ ) {
+		for ( i = 0; i < gameBoard.initialObjects; i ++ ) {
 
 			var floor 	= Math.floor(i/3);
 			var line 	= Math.floor(i%3);
-			color		= Math.random() * 0xffffff;
-/*
-			var material = Physijs.createMaterial(
-				new THREE.MeshLambertMaterial({ color: Math.random() * 0xffffff }),
-				.6, // medium friction
-				.3 // low restitution
-			);*/
-			
-			material =  new THREE.MeshLambertMaterial( { color: color } );
+			color		= gameBoard.getRandomColor();
+
+			material = new THREE.MeshPhongMaterial( { metal : true, ambient: 0x030303, color: color, specular: 0x009900, shininess: 10, shading: THREE.SmoothShading } );
 				
 			var object = new Physijs.BoxMesh( geometry, material );	
 			object.material.ambient = object.material.color;
@@ -139,9 +154,9 @@ GameBoardClass = Class.extend({
 			object.rotation.y = ( floor % 2 === 0 ) ? 0 : Math.PI / 2.01;
 			object.rotation.z = 0;
 
-			object.castShadow = true;
-			object.receiveShadow = true;
-			object.__dirtyPosition = true;
+			object.castShadow 		= true;
+			object.receiveShadow 	= true;
+			object.__dirtyPosition 	= true;
 
 			gameBoard.scene.add( object );
 			
@@ -161,9 +176,12 @@ GameBoardClass = Class.extend({
 	
 	reset : function() {
 	
+		gameBoard.stopAnimate();
 		gameBoard.cameraControls.autoRotate= true;
 		gameBoard.cameraControls.userZoom = gameBoard.cameraControls.userRotate = true;
 		
+		gameBoard.counter = 0;
+		gameBoard.checkedPlace  = false;
 		gameBoard.haveLost 		= false;
 		gameBoard.checkedMove 	= false;
 		
@@ -185,11 +203,11 @@ GameBoardClass = Class.extend({
 		
 		gameBoard.objects = [];
 	
-		for ( i = 0; i < 19; i ++ ) {
+		for ( i = 0; i < gameBoard.initialObjects; i ++ ) {
 		
 				floor 	= Math.floor(i/3);
 				line 	= Math.floor(i%3);
-				color	= Math.random() * 0xffffff;
+				color	= gameBoard.getRandomColor();
 
 				block = simpleArray.pop();	
 				block.material.color 	= new THREE.Color( color );
@@ -213,6 +231,10 @@ GameBoardClass = Class.extend({
 				
 				gameBoard.objects[ floor ][line] = block;
 		}
+		
+		gameBoard.scene.simulate( 1.5, 5 );
+			
+		setTimeout( gameBoard.animate, 500 );
 	},
 
 	onWindowResize : function() {
@@ -223,9 +245,13 @@ GameBoardClass = Class.extend({
 		gameBoard.renderer.setSize( gameBoard.VIEWPORT_DIMENSIONS.w, gameBoard.VIEWPORT_DIMENSIONS.h );
 	},
 
+	stopAnimate : function() {
+		window.cancelAnimationFrame( gameBoard.looper );
+	},
+
 	animate : function() {
 
-		requestAnimationFrame( gameBoard.animate );
+		gameBoard.looper = requestAnimationFrame( gameBoard.animate );
 
 		gameBoard.render();
 		
@@ -233,28 +259,30 @@ GameBoardClass = Class.extend({
 	},
 
 	render : function() {
-		
-		directionalLight.position.copy( gameBoard.camera.position );
-		
+	
 		if ( connections.data.state != PLAY_PLACE )
 			gameBoard.scene.simulate( 1.5, 5 );
 			
-		if( gameBoard.ground._physijs.touches.length > 4 && !gameBoard.haveLost )
-			gameBoard.loose();
+		gameBoard.handleState();
 		
-		if( connections.data.state == PLAY_MOVE && !gameBoard.checkedMove && !gameBoard.haveLost )
-			gameBoard.checkMove();
+		gameBoard.checkLoose();
 
 		gameBoard.cameraControls.update();
-	
+		gameBoard.spotLight.position.copy( gameBoard.camera.position );
 		gameBoard.renderer.render( gameBoard.scene, gameBoard.camera );
 	},
 
 	handleSelection :function( direction ) {
 		
+		console.log("select:", machine.getActiveUserData().name );
+		
 		gameBoard.cameraControls.autoRotate= false;
 		gameBoard.cameraControls.userZoom = gameBoard.cameraControls.userRotate = true;
-		gameBoard.checkedMove = false;
+		
+		gameBoard.counter = 0;
+		gameBoard.checkedPlace  = false;
+		gameBoard.haveLost 		= false;
+		gameBoard.checkedMove 	= false;
 		
 		switch( direction )
 		{
@@ -281,27 +309,7 @@ GameBoardClass = Class.extend({
 	select : function() {
 		
 		gameBoard.actualObject = gameBoard.objects[ gameBoard.actualSelection.floor ][ gameBoard.actualSelection.line ];
-		gameBoard.actualObject.material.setValues( { color : machine.getActiveUserData().color } );
-		gameBoard.actualObject.material.transparent = false;
-		gameBoard.actualObject.material.opacity 	= 1;
-		gameBoard.actualObject.castShadow 			= true;
-		gameBoard.actualObject.receiveShadow 		= true;
-
-		for ( var i = 0; i < gameBoard.objects.length; i++ )
-		{
-			for (var j = 0; j < gameBoard.objects[i].length; j++ )
-			{
-				if ( gameBoard.objects[i][j] && gameBoard.objects[i][j] !=  gameBoard.actualObject )
-				{
-					gameBoard.objects[i][j].material.setValues( { color : COLOR_GRAY } );
-					gameBoard.objects[i][j].material.transparent = true;
-					gameBoard.objects[i][j].material.opacity = .3;
-					gameBoard.objects[i][j].castShadow 		= false;
-					gameBoard.objects[i][j].receiveShadow 	= false;
-				
-				}
-			}
-		}
+		gameBoard.makeTransparent();
 	},
 
 	handleMove: function( direction ){
@@ -309,10 +317,10 @@ GameBoardClass = Class.extend({
 		var vector = new THREE.Vector3;
 		switch( direction )
 		{
-			case 0 : vector.z = -40; break;	// up
-			case 1 : vector.x = -40; break;	// left
-			case 2 : vector.z = 40; break;	// down
-			case 3 : vector.x = 40; break;	// right
+			case 0 : vector.z = -30; break;	// up
+			case 1 : vector.x = -30; break;	// left
+			case 2 : vector.z = 30; break;	// down
+			case 3 : vector.x = 30; break;	// right
 		}
 		
 		gameBoard.move( vector );
@@ -421,30 +429,75 @@ GameBoardClass = Class.extend({
 				gameBoard.actualObject._physijs.angularVelocity.y === 0 &&
 				gameBoard.actualObject._physijs.angularVelocity.z === 0 )
 			{
-				console.log( "MOVE OK!!!!!!!!")
-				
 				gameBoard.checkedMove = true;
 				connections.sendMessage('/moveOK');
 			}
 		}
-	}, 
-	
-	clean : function(){
-		gameBoard.actualSelection 	= { floor : 0, line : 0 };
-		gameBoard.actualObject		= null;
-		gameBoard.select();
 	},
 	
-	loose : function(){
+	checkPlace : function()
+	{
+		gameBoard.counter++;
 		
-		gameBoard.cameraControls.autoRotate= true;
-		gameBoard.cameraControls.userZoom = gameBoard.cameraControls.userRotate = false;
+		if( gameBoard.counter < 30 )
+			return;
+	
+		var i, j;
+		var floors = gameBoard.objects.length, lines;
+		var object;
+		var movingObjects = gameBoard.initialObjects;
 		
-		console.log( "TOUCHES::", gameBoard.ground._physijs.touches.length );
+		for ( i = 0; i < floors; i++ )
+		{
+			lines = gameBoard.objects[i].length;
 		
-		gameBoard.makeOpaque();
-		gameBoard.haveLost = true;
-		connections.sendMessage('/loose');
+			for ( j = 0; j < lines; j++ )
+			{
+				object = gameBoard.objects[i][j];
+					
+				if( object && object._physijs )
+				{
+					if( object._physijs.linearVelocity.x === 0 &&
+						object._physijs.linearVelocity.y === 0 &&
+						object._physijs.linearVelocity.z === 0 &&
+						object._physijs.angularVelocity.x === 0 &&
+						object._physijs.angularVelocity.y === 0 &&
+						object._physijs.angularVelocity.z === 0 )
+					{
+						movingObjects--;
+					}
+				}
+			}
+		}
+		
+		if ( movingObjects === 0 )
+			gameBoard.checkedPlace = true;
+	},
+	
+	cleanAndStart : function(){
+		
+		gameBoard.counter = 0;
+		gameBoard.checkedMove = gameBoard.checkedPlace = gameBoard.haveLost = false;
+		gameBoard.actualSelection 	= { floor : 0, line : 0 };
+		gameBoard.actualObject		= null;
+		
+		connections.sendMessage('/startGame');
+	},
+	
+	checkLoose : function(){
+		
+		if( gameBoard.haveLost || connections.data.state < PLAY_MOVE || connections.data.state > CHECK_PLACE )
+			return;
+		
+		if ( gameBoard.ground._physijs.touches.length > 4 )
+		{
+			gameBoard.cameraControls.autoRotate= true;
+			gameBoard.cameraControls.userZoom = gameBoard.cameraControls.userRotate = false;
+			
+	//		gameBoard.makeOpaque();
+			gameBoard.haveLost = true;
+			connections.sendMessage('/loose');
+		}
 	}, 
 	
 	resetView: function(){
@@ -464,6 +517,9 @@ GameBoardClass = Class.extend({
 	
 	makeOpaque : function(){
 		
+		if( gameBoard.actualObject )
+			gameBoard.actualObject.castShadow 	= true;
+		
 		for ( var i = 0; i < gameBoard.objects.length; i++ )
 		{
 			for (var j = 0; j < gameBoard.objects[i].length; j++ )
@@ -482,6 +538,15 @@ GameBoardClass = Class.extend({
 	
 	makeTransparent : function(){
 	
+		if( gameBoard.actualObject )
+		{
+			gameBoard.actualObject.material.setValues( { color : machine.getActiveUserData().color } );
+			gameBoard.actualObject.material.transparent = false;
+			gameBoard.actualObject.material.opacity 	= 1;
+			gameBoard.actualObject.castShadow 			= false;
+			gameBoard.actualObject.receiveShadow 		= true;
+		}
+		
 		for ( var i = 0; i < gameBoard.objects.length; i++ )
 		{
 			for (var j = 0; j < gameBoard.objects[i].length; j++ )
@@ -494,6 +559,30 @@ GameBoardClass = Class.extend({
 					gameBoard.objects[i][j].castShadow 		= false;
 					gameBoard.objects[i][j].receiveShadow 	= false;
 				}
+			}
+		}
+	}, 
+	
+	getRandomColor : function(){
+		return Math.random() * 0xAAAAAA;
+	},
+	
+	handleState : function(){
+		
+		if( gameBoard.haveLost )
+			return;
+		
+		if( connections.data.state == PLAY_MOVE && !gameBoard.checkedMove )
+			gameBoard.checkMove();
+		
+		if ( connections.data.state == CHECK_PLACE && gameBoard.checkedMove  )
+		{
+			if( !gameBoard.checkedPlace )
+				gameBoard.checkPlace();
+			else 
+			{
+				console.log( "CHECKEDPLACE to start:"+gameBoard.checkedPlace )
+				gameBoard.cleanAndStart();
 			}
 		}
 	}

@@ -36,12 +36,11 @@ MachineClass = Class.extend({
 
 	onMessageHandler : function() {
 		
-		console.log( "ON MESSAGE MACHINE!!!!", connections.data.state );
 		machine.setScreen();
 		
 		if ( connections.data.state == PLAY_SELECT )
 		{
-			if ( connections.data.press >= 0 )
+//			if ( connections.data.press >= 0 )
 				gameBoard.handleSelection( connections.data.press );
 			
 		} else if ( connections.data.state == PLAY_MOVE )
@@ -54,10 +53,6 @@ MachineClass = Class.extend({
 			if ( connections.data.press >= 0 )
 				gameBoard.handlePlace( connections.data.press );
 				
-		} else if ( connections.data.state == CHECK_PLACE )
-		{
-			gameBoard.clean();
-			connections.sendMessage('/startGame');
 		} 
 	},
 	
@@ -123,6 +118,9 @@ MachineClass = Class.extend({
 			
 		if ( connections.data.state == PLAY_PLACE )
 			$('#info_screen p').text( MACHINE_PLAYERPLACE );
+			
+		if ( connections.data.state == CHECK_PLACE )	
+			$('#info_screen p').text( MACHINE_CHECKPLACE );
 			
 	},
 	

@@ -26,8 +26,6 @@ PlayerClass = Class.extend({
 	},
 	
 	onMessage : function() {
-	
-		console.log( "ON MESSAGE PLAYER!!!!")
 		
 		if ( connections.data.state == PLAY_STARTGAME )
 		{
@@ -49,15 +47,15 @@ PlayerClass = Class.extend({
 		if ( connections.data.state == PLAY_MOVE && connections.data.active == connections.me )
 		{
 			$('h1').text(PLAYER_MOVE);
-			$('#btnOK').hide();
+			TweenMax.to( '#btnOK', .5, { scaleX : 0, scaleY : 0, autoAlpha : true, ease : "Power3.easeOut", overwrite : 1 } )
 			
 		} else if ( connections.data.state == PLAY_PLACE && connections.data.active == connections.me ) {
 		
 			$('h1').text(PLAYER_PLACE);
-			$('#btnOK').show();
+			TweenMax.to( '#btnOK', .5, { scaleX : 1, scaleY : 1, autoAlpha : true, ease : "Power3.easeOut", overwrite : 1 } )
 		}
 		
-		if ( connections.data.state == READY || connections.data.state == LOOSE )
+		if ( connections.data.state == READY || connections.data.state >= CHECK_PLACE )
 		{
 			player.hideButtons();
 		}

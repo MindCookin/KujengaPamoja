@@ -12,6 +12,7 @@ const LOOSE 			= 8;
 const	MACHINE_PLAYERSELECT 	= "It's [ACTIVE] turn. Select a block with your pad and press OK when done."; 
 const	MACHINE_PLAYERMOVE 		= "Now move your block and release it from the block tower. Be careful and don't drop any other block."; 
 const	MACHINE_PLAYERPLACE		= "Great. Now select a position to place your block and pass the buck to the next one." ;
+const	MACHINE_CHECKPLACE		= 'Stability checking...';
 
 const	PLAYER_WAIT 	= 'Wait for your turn'; 
 const	PLAYER_SELECT 	= 'Select a block'; 

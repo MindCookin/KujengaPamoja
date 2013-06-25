@@ -8,8 +8,6 @@ ConnectionClass = EventBusClass.extend({
 				
 	sendMessage : function(path, opt_param) {
 		
-		console.log( connections.game_key, connections.me );
-		
 		path += '?g=' + connections.game_key;
 		
 		if (opt_param) {
@@ -21,8 +19,6 @@ ConnectionClass = EventBusClass.extend({
 	},
 		  
 	onOpened : function() {
-	
-		console.log( "onOpened" );
 		connections.sendMessage('/opened');
 	},
 				  
@@ -30,7 +26,6 @@ ConnectionClass = EventBusClass.extend({
 			  
 		// The first connection receives a bad formatted JSON
 		// so first of all I check if the message(m) is ok or not
-		console.log( "onMessage : received message" );
 		
 		try
 		{
