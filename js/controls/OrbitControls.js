@@ -222,19 +222,19 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 		event.preventDefault();
 
-		if ( event.button === 0 ) {
+		if ( event.button === 0 && scope.userRotate === true  ) {
 
 			state = STATE.ROTATE;
 
 			rotateStart.set( event.clientX, event.clientY );
 
-		} else if ( event.button === 1 ) {
+		} else if ( event.button === 1 && scope.userZoom === true ) {
 
 			state = STATE.ZOOM;
 
 			zoomStart.set( event.clientX, event.clientY );
 
-		} else if ( event.button === 2 ) {
+		} else if ( event.button === 2 && scope.userPan === true ) {
 
 			state = STATE.PAN;
 

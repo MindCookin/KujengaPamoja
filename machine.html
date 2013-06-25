@@ -7,8 +7,9 @@
 		<!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
 		Remove this if you use the .htaccess -->
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+		<link rel="icon" type="image/png" href="/images/favicon.ico" />
 
-		<title>Block Fiesta</title>
+		<title>kujenga pamoja</title>
 		<meta name="description" content="" />
 		<meta name="author" content="Yago" />
 
@@ -45,13 +46,17 @@
 
 	<body class="machine">
 	
-		<h1>Block Fiesta</h1>
+		<h1>kujenga pamoja</h1>
 		
 		<div id="game_wrapper" class="box-shadowed">
-		
-			<!-------------------------------------- INITIAL SCREEN -->
+			<ul id="toolbar">
+				<li><a class="btnResetView" href="#">Reset View</a></li>
+				<li><a class="btnTransparency" href="#">Transparency on/off</a></li>
+				<li><a class="btnSound" href="#">Sound on/off</a></li>
+			</ul>
+			<!-------------------------------------- INITIAL SCREEN-->
 			<div id="initial_screen" class="popup box-shadowed">
-				<p>block FIESTA is an interactive experience to play with your friends. Open Google chrome in your smartphones and go to:</p>
+				<p>kujenga pamoja is an interactive experience to play with your friends. Open Google chrome in your smartphones and go to:</p>
 				<p class="align-center"><a href="{{ game_url }}" class="url">{{ game_url }}</a></p>
 				<p>when you are done just click play</p>
 				<a class="btnPlay box-shadowed">PLAY</a>

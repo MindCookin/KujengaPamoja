@@ -7,6 +7,7 @@
 		<!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
 		Remove this if you use the .htaccess -->
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+		<link rel="icon" type="image/png" href="/images/favicon.ico" />
 
 		<title>index</title>
 		<meta name="description" content="" />
@@ -40,7 +41,8 @@
 	<body class="player {% if user1 == me %} red {% elif user2 == me %} green {% elif user3 == me %} blue {% elif user4 == me %} yellow {% endif %}">
 		<div id="player_wrapper">
 			<h1>
-				{% if user1 	== me %} WELCOME RED PLAYER
+				{% if user_disabled %} Sorry, you CANNOT LOG TWO TIMES WITH THE SAME USER
+				{% elif user1 	== me %} WELCOME RED PLAYER
 				{% elif user2 	== me %} WELCOME GREEN PLAYER
 				{% elif user3 	== me %} WELCOME BLUE PLAYER
 				{% elif user4 	== me %} WELCOME YELLOE PLAYER

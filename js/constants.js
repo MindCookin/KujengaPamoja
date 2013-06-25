@@ -18,3 +18,9 @@ const	PLAYER_SELECT 	= 'Select a block';
 const	PLAYER_MOVE 	= 'Remove it from the block tower'; 
 const	PLAYER_PLACE	= 'Now place it over the top';
 const	PLAYER_TURN		= '[ACTIVE] turn';
+
+const COLOR_RED 	= 0xa91515;
+const COLOR_GREEN 	= 0x3ba915;
+const COLOR_BLUE 	= 0x1561a9;
+const COLOR_YELLOW	= 0xe7ac04;
+const COLOR_GRAY	= 0x777777;

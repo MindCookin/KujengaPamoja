@@ -1,10 +1,37 @@
 MachineClass = Class.extend({
 
+	playerData : [ 	{ name:'Red Player',className:'red',color:COLOR_RED }, 
+					{ name:'Green Player',className:'green',color:COLOR_GREEN },
+					{ name:'Blue Player',className:'blue',color:COLOR_BLUE },
+					{ name:'Yellow Player',className:'yellow',color:COLOR_YELLOW } ],
+
 	start : function(){
 		
+		$('.btnSound').click( machine.toggleSound );
+		$('.btnTransparency').click( machine.toggleTransparency );
+		$('.btnResetView').click( machine.resetView );
 		$('.btnPlay').click( machine.clickPlay );
 		
 		connections.addEventListener("onMessage", machine.onMessageHandler );
+		connections.addEventListener("onClose", machine.onCloseHandler );
+	},
+	
+	onCloseHandler : function(){
+		
+		if ( connections.data.closed )
+		{
+			var selector;
+			switch( connections.data.closed )
+			{
+				case connections.data.user1 : selector = "#playersSidebar .red";	break;
+				case connections.data.user2 : selector = "#playersSidebar .green";	break;
+				case connections.data.user3 : selector = "#playersSidebar .blue";	break;
+				case connections.data.user4 : selector = "#playersSidebar .yellow";	break;
+			}
+			
+			$( selector ).removeClass( 'active' );
+			TweenMax.to( selector, .5, {marginLeft:-150} ); 
+		}
 	},
 
 	onMessageHandler : function() {
@@ -69,7 +96,7 @@ MachineClass = Class.extend({
 		
 		if ( connections.data.state == PLAY_STARTGAME )
 		{
-			$('#info_screen p').text( MACHINE_PLAYERSELECT.replace("[ACTIVE]", machine.getActiveUserName() ) );
+			$('#info_screen p').text( MACHINE_PLAYERSELECT.replace("[ACTIVE]", machine.getActiveUserData().name ) );
 			
 			TweenMax.to( '#initial_screen', .5, {scaleX:0,scaleY:0,ease:"Quint.easeIn"} );
 			TweenMax.to( '#stats_screen', .5, {scaleX:0,scaleY:0,ease:"Quint.easeIn"} );
@@ -80,12 +107,12 @@ MachineClass = Class.extend({
 			$('body').removeClass( 'red green blue yellow');
 			$('#info_screen').removeClass( 'red green blue yellow');
 			
-			$('#info_screen').addClass( machine.getActiveUserColor() );
-			$('body').addClass( machine.getActiveUserColor() );
+			$('#info_screen').addClass( machine.getActiveUserData().className );
+			$('body').addClass( machine.getActiveUserData().className );
 			
 			$('#playersSidebar li').each( function(){
-				if( $(this).hasClass( machine.getActiveUserColor() ) )
-					$(this).text( PLAYER_TURN.replace("[ACTIVE]", machine.getActiveUserName() ) )
+				if( $(this).hasClass( machine.getActiveUserData().className ) )
+					$(this).text( PLAYER_TURN.replace("[ACTIVE]", machine.getActiveUserData().name ) )
 				else
 					$(this).text( PLAYER_WAIT );
 			});
@@ -99,32 +126,15 @@ MachineClass = Class.extend({
 			
 	},
 	
-	getActiveUserName : function(){
+	getActiveUserData : function(){
 		
-		var name;
 		switch( connections.data.active )
 		{
-			case connections.data.user1 : name = 'Red Player'; break;
-			case connections.data.user2 : name = 'Green Player'; break;
-			case connections.data.user3 : name = 'Blue Player'; break;
-			case connections.data.user4 : name = 'Yellow Player'; break;
+			case connections.data.user1 : return machine.playerData[0]; break;
+			case connections.data.user2 : return machine.playerData[1]; break;
+			case connections.data.user3 : return machine.playerData[2]; break;
+			case connections.data.user4 : return machine.playerData[3]; break;
 		}
-		
-		return name;
-	},
-	
-	getActiveUserColor : function(){
-		
-		var color;
-		switch( connections.data.active )
-		{
-			case connections.data.user1 : color = 'red'; break;
-			case connections.data.user2 : color = 'green'; break;
-			case connections.data.user3 : color = 'blue'; break;
-			case connections.data.user4 : color = 'yellow'; break;
-		}
-		
-		return color;
 	},
 	
 	addActiveClass : function( target ){
@@ -138,6 +148,29 @@ MachineClass = Class.extend({
 		
 		connections.sendMessage('/startGame');
 		return false;
+	}, 
+	
+	toggleSound : function( event ){
+		// TODO
+	}, 
+	
+	toggleTransparency : function( event ){
+		if ( $(this).hasClass('transparent'))
+		{
+			TweenMax.to( $(this), .5, { alpha : 1 } );
+			$(this).removeClass('transparent');
+			gameBoard.makeTransparent();
+		}
+		else
+		{
+			TweenMax.to( $(this), .5, { alpha : .5 } );
+			$(this).addClass('transparent');
+			gameBoard.makeOpaque();
+		}
+	},
+	
+	resetView : function( event ){
+		gameBoard.resetView();
 	}
 });
 

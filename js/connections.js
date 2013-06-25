@@ -3,6 +3,8 @@ ConnectionClass = EventBusClass.extend({
 	game_key 	: null,
 	me 			: null,
 	data 		: {},
+	socket		: null,
+	channel		: null,
 				
 	sendMessage : function(path, opt_param) {
 		
@@ -28,7 +30,6 @@ ConnectionClass = EventBusClass.extend({
 			  
 		// The first connection receives a bad formatted JSON
 		// so first of all I check if the message(m) is ok or not
-			
 		console.log( "onMessage : received message" );
 		
 		try
@@ -42,20 +43,28 @@ ConnectionClass = EventBusClass.extend({
 		}
 			
 		if( newState ) { 
-			
-			connections.data.user1 	= newState.user1;
-			connections.data.user2 	= newState.user2;
-			connections.data.user3 	= newState.user3;
-			connections.data.user4 	= newState.user4;
-			connections.data.machine= newState.machine;
-			connections.data.active = newState.active;
-			connections.data.press  = newState.press;
-			connections.data.loose  = newState.loose;
-			connections.data.state  = newState.state;
-			
-			console.log( "STATE : " + newState.state );
-			
-			connections.dispatch("onMessage");
+		
+			if ( newState.closed )
+			{
+				connections.data.closed = newState.closed;
+				connections.dispatch("onClose");
+			}
+			else	
+			{
+				connections.data.user1 	= newState.user1;
+				connections.data.user2 	= newState.user2;
+				connections.data.user3 	= newState.user3;
+				connections.data.user4 	= newState.user4;
+				connections.data.machine= newState.machine;
+				connections.data.active = newState.active;
+				connections.data.press  = newState.press;
+				connections.data.loose  = newState.loose;
+				connections.data.state  = newState.state;
+				
+				console.log( "STATE : " + newState.state );
+				
+				connections.dispatch("onMessage");
+			}
 		}
 	},
 				  
@@ -70,25 +79,28 @@ ConnectionClass = EventBusClass.extend({
 	openChannel : function( token ) {
 
 		var token 	= token;
-		var channel = new goog.appengine.Channel( token );
-			
-		console.log( token );
+		connections.channel = new goog.appengine.Channel( token );
 			
 		var handler = {
-			'onopen': connections.onOpened,
-			'onmessage': connections.onMessage,
-			'onerror': connections.onError,
-			'onclose': connections.onClose
+			'onopen': 	connections.onOpened,
+			'onmessage':connections.onMessage,
+			'onerror': 	connections.onError,
+			'onclose': 	connections.onClose
 		};
 
-		var socket = channel.open(handler);
-		socket.onopen = connections.onOpened;
-		socket.onmessage = connections.onMessage;
+		connections.socket 			= connections.channel.open(handler);
+		connections.socket.onopen 	= connections.onOpened;
+		connections.socket.onmessage= connections.onMessage;
+		connections.socket.onclose	= connections.onClose;
 	},
 		  
 	initialize : function( token ) {
 		
-		// TODO : review unnecessary initial message	
+		window.onbeforeunload = function () {
+			connections.sendMessage('/closed');
+//			window.onbeforeunload = undefined;
+		};
+		
 		connections.openChannel( token );
 	}   
 });  

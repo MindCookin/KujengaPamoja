@@ -15,6 +15,13 @@ h1 { margin : 19px auto; text-align: center; font: 70px 'CommandoCommando', Aria
 
 #game_wrapper { background:#FFFFFF; width:900px; height: 500px; margin: 15px auto 0 auto; position:relative; }
 
+#toolbar{ position : absolute; top: 10px; right : 10px; margin : 0; padding : 0; }
+	#toolbar li { float : left; width : 30px; margin:0 5px; }
+	#toolbar a { display : block; width : 30px; height : 40px; text-indent : -1000px; overflow : hidden; }
+	.btnSound { background: url('../images/btnSound.png') no-repeat center center; }
+	.btnTransparency{ background: url('../images/btnTransparency.png') no-repeat center center; }
+	.btnResetView{ background: url('../images/btnResetView.png') no-repeat center center; }
+			
 #playersSidebar { position : absolute; top : 20%; left : 0px; list-style : none; margin : 0; padding : 0; z-index : 100; }
 	#playersSidebar li { display:block; margin-bottom: 20px; padding: 10px 45px 10px 10px; width: 165px; font: 30px/32px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; color: white;   background: url('../images/mobile-icon.png') 175px center no-repeat; margin-left : -150px; }
 	#playersSidebar li.active{  margin-left : 0; } 
@@ -54,7 +61,7 @@ body.player.blue{ background:#1561a9; }
 body.player.yellow{ background:#e7ac04; }
 
 #player_wrapper {	position:relative; text-align: center;} 
-	#player_wrapper h1 { font: 60px/40px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; color: black; text-shadow:	2px 2px 0 #fff; }
+	#player_wrapper h1 { font: 60px/45px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; color: black; text-shadow:	2px 2px 0 #fff; }
 
 #playerButtons { position: relative;	margin	: 20px auto; width : 225px; visibility : hidden }
 	#playerButtons a { background : #000000; box-shadow: 3px 3px 0px #FFFFFF; display: block; position : absolute; text-indent:-10000px; overflow:hidden; }

@@ -24,6 +24,7 @@ GameBoardClass = Class.extend({
 		Physijs.scripts.worker 	= 'js/libs/physijs_worker.js';
 		Physijs.scripts.ammo 	= 'ammo.js';
 
+		var block, color;
 		var i;
 		var container = document.getElementById( 'game_wrapper' );
 		
@@ -39,15 +40,18 @@ GameBoardClass = Class.extend({
 		container.appendChild( gameBoard.renderer.domElement );
 
 		gameBoard.camera = new THREE.PerspectiveCamera( 50, gameBoard.VIEWPORT_DIMENSIONS.w / gameBoard.VIEWPORT_DIMENSIONS.h, 1, 10000 );
-		gameBoard.camera.position.z = 250;
-		gameBoard.camera.position.y = 170;
-		gameBoard.camera.position.x = 120;
+		gameBoard.camera.position.x = 150;
+		gameBoard.camera.position.y = 180;
+		gameBoard.camera.position.z = 200;
 
 		gameBoard.cameraControls = new THREE.OrbitControls( gameBoard.camera, gameBoard.renderer.domElement );
-//		gameBoard.cameraControls.autoRotate= true
+		gameBoard.cameraControls.autoRotate= true;
+		gameBoard.cameraControls.userRotate = gameBoard.cameraControls.userPan = gameBoard.cameraControls.userZoom = false;
 		gameBoard.cameraControls.maxPolarAngle = Math.PI/2.5;
 		gameBoard.cameraControls.maxDistance = 500;
 		gameBoard.cameraControls.minDistance = 50;
+		gameBoard.cameraControls.center.copy( new THREE.Vector3(0,50,0))
+		gameBoard.cameraControls.zoomIn(1.5)
 
 		gameBoard.scene = new Physijs.Scene();
 
@@ -113,19 +117,19 @@ GameBoardClass = Class.extend({
 
 			var floor 	= Math.floor(i/3);
 			var line 	= Math.floor(i%3);
-
+			color		= Math.random() * 0xffffff;
+/*
 			var material = Physijs.createMaterial(
 				new THREE.MeshLambertMaterial({ color: Math.random() * 0xffffff }),
 				.6, // medium friction
 				.3 // low restitution
-			);
+			);*/
 			
-			//material =  new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } );
+			material =  new THREE.MeshLambertMaterial( { color: color } );
 				
 			var object = new Physijs.BoxMesh( geometry, material );	
 			object.material.ambient = object.material.color;
-			object.originalColor = object.material.color;
-			object.collisions = 0;	// important for collision handling
+			object.originalColor = color;
 
 			object.position.x = ( floor % 2 === 0 ) ? line * gameBoard.CUBE_DIMENSIONS.w - ( gameBoard.CUBE_DIMENSIONS.w * 1.5 ) : -gameBoard.CUBE_DIMENSIONS.w /2;
 			object.position.y = gameBoard.CUBE_DIMENSIONS.h/2 + ( gameBoard.CUBE_DIMENSIONS.h*1*floor );
@@ -157,7 +161,13 @@ GameBoardClass = Class.extend({
 	
 	reset : function() {
 	
-		var block;
+		gameBoard.cameraControls.autoRotate= true;
+		gameBoard.cameraControls.userZoom = gameBoard.cameraControls.userRotate = true;
+		
+		gameBoard.haveLost 		= false;
+		gameBoard.checkedMove 	= false;
+		
+		var block, color;
 		var floor, line, i, j;
 		var simpleArray = [];	
 		
@@ -179,11 +189,12 @@ GameBoardClass = Class.extend({
 		
 				floor 	= Math.floor(i/3);
 				line 	= Math.floor(i%3);
+				color	= Math.random() * 0xffffff;
 
 				block = simpleArray.pop();	
-				block.material.color 	= new THREE.Color( Math.random() * 0xffffff );
+				block.material.color 	= new THREE.Color( color );
 				block.material.ambient 	= block.material.color;
-				block.originalColor 	= block.material.color;
+				block.originalColor 	= color;
 
 				block.position.x = ( floor % 2 === 0 ) ? line * gameBoard.CUBE_DIMENSIONS.w - ( gameBoard.CUBE_DIMENSIONS.w * 1.5 ) : -gameBoard.CUBE_DIMENSIONS.w /2;
 				block.position.y = gameBoard.CUBE_DIMENSIONS.h/2 + ( gameBoard.CUBE_DIMENSIONS.h*1*floor );
@@ -241,6 +252,8 @@ GameBoardClass = Class.extend({
 
 	handleSelection :function( direction ) {
 		
+		gameBoard.cameraControls.autoRotate= false;
+		gameBoard.cameraControls.userZoom = gameBoard.cameraControls.userRotate = true;
 		gameBoard.checkedMove = false;
 		
 		switch( direction )
@@ -268,10 +281,11 @@ GameBoardClass = Class.extend({
 	select : function() {
 		
 		gameBoard.actualObject = gameBoard.objects[ gameBoard.actualSelection.floor ][ gameBoard.actualSelection.line ];
-		gameBoard.actualObject.material.transparent 	= false;
-		gameBoard.actualObject.material.opacity 		= 1;
-		gameBoard.actualObject.castShadow 	= true;
-		gameBoard.actualObject.receiveShadow 	= true;
+		gameBoard.actualObject.material.setValues( { color : machine.getActiveUserData().color } );
+		gameBoard.actualObject.material.transparent = false;
+		gameBoard.actualObject.material.opacity 	= 1;
+		gameBoard.actualObject.castShadow 			= true;
+		gameBoard.actualObject.receiveShadow 		= true;
 
 		for ( var i = 0; i < gameBoard.objects.length; i++ )
 		{
@@ -279,10 +293,12 @@ GameBoardClass = Class.extend({
 			{
 				if ( gameBoard.objects[i][j] && gameBoard.objects[i][j] !=  gameBoard.actualObject )
 				{
+					gameBoard.objects[i][j].material.setValues( { color : COLOR_GRAY } );
 					gameBoard.objects[i][j].material.transparent = true;
 					gameBoard.objects[i][j].material.opacity = .3;
 					gameBoard.objects[i][j].castShadow 		= false;
 					gameBoard.objects[i][j].receiveShadow 	= false;
+				
 				}
 			}
 		}
@@ -420,9 +436,66 @@ GameBoardClass = Class.extend({
 	},
 	
 	loose : function(){
+		
+		gameBoard.cameraControls.autoRotate= true;
+		gameBoard.cameraControls.userZoom = gameBoard.cameraControls.userRotate = false;
+		
 		console.log( "TOUCHES::", gameBoard.ground._physijs.touches.length );
+		
+		gameBoard.makeOpaque();
 		gameBoard.haveLost = true;
 		connections.sendMessage('/loose');
+	}, 
+	
+	resetView: function(){
+		
+		gameBoard.camera.position.copy( new THREE.Vector3(50,180,200));
+
+		gameBoard.cameraControls = new THREE.OrbitControls( gameBoard.camera, gameBoard.renderer.domElement );
+		gameBoard.cameraControls.autoRotate= true;
+		gameBoard.cameraControls.userPan = false;
+		gameBoard.cameraControls.userRotate = gameBoard.cameraControls.userZoom = true;
+		gameBoard.cameraControls.maxPolarAngle = Math.PI/2.5;
+		gameBoard.cameraControls.maxDistance = 500;
+		gameBoard.cameraControls.minDistance = 50;
+		gameBoard.cameraControls.center.copy( new THREE.Vector3(0,50,0))
+		gameBoard.cameraControls.zoomIn(1.5)
+	}, 
+	
+	makeOpaque : function(){
+		
+		for ( var i = 0; i < gameBoard.objects.length; i++ )
+		{
+			for (var j = 0; j < gameBoard.objects[i].length; j++ )
+			{
+				if ( gameBoard.objects[i][j] && gameBoard.objects[i][j] != gameBoard.actualObject )
+				{
+					gameBoard.objects[i][j].material.setValues( { color : gameBoard.objects[i][j].originalColor } );
+					gameBoard.objects[i][j].material.transparent = false;
+					gameBoard.objects[i][j].material.opacity = 1;
+					gameBoard.objects[i][j].castShadow 		= true;
+					gameBoard.objects[i][j].receiveShadow 	= true;
+				}
+			}
+		}
+	}, 
+	
+	makeTransparent : function(){
+	
+		for ( var i = 0; i < gameBoard.objects.length; i++ )
+		{
+			for (var j = 0; j < gameBoard.objects[i].length; j++ )
+			{
+				if ( gameBoard.objects[i][j] && gameBoard.objects[i][j] != gameBoard.actualObject )
+				{
+					gameBoard.objects[i][j].material.setValues( { color : COLOR_GRAY } );
+					gameBoard.objects[i][j].material.transparent = true;
+					gameBoard.objects[i][j].material.opacity = .5;
+					gameBoard.objects[i][j].castShadow 		= false;
+					gameBoard.objects[i][j].receiveShadow 	= false;
+				}
+			}
+		}
 	}
 })
 

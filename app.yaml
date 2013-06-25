@@ -12,7 +12,7 @@ handlers:
 - url: /js
   static_dir: js
 - url: /.*
-  script: blockfiesta.application
+  script: kujengapamoja.application
   
 libraries:
 - name: webapp2
