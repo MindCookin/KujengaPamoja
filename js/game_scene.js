@@ -8,16 +8,19 @@ GameSceneClass = Class.extend({
 	scene		: null,
 	renderer	: null,
 	spotLight	: null,
+	fixedDirectionalLight : null,
 	pointLight	: null,
 	stats		: null,
+	arrows 		: null,
 	
 	actualSelection : { floor : 0, line : 0 },
 	
+	arrowsChildren : [],
 	objects 	: [],
 	ground 		: null,
 	actualObject: null,
 	
-	initialObjects : 19,
+	initialObjects : 20,
 
 	start : function() {
 	
@@ -55,24 +58,25 @@ GameSceneClass = Class.extend({
 		gameScene.cameraControls.maxDistance = 500;
 		gameScene.cameraControls.minDistance = 50;
 		gameScene.cameraControls.center.copy( new THREE.Vector3(0,50,0))
-		gameScene.cameraControls.zoomIn(1.5)
+		gameScene.cameraControls.zoomIn(1)
 		gameScene.scene = new Physijs.Scene();
 
 		// lights
 		gameScene.scene.add( new THREE.AmbientLight( 0x000000 ) );
 
-		var spotLight = new THREE.DirectionalLight( 0xffffff, 1.5 );
-		spotLight.position.copy( gameScene.camera.position );
-		spotLight.position.setZ( 200 );
-		spotLight.castShadow = true;
-		spotLight.shadowCameraNear = 200;
-		spotLight.shadowCameraFar = gameScene.camera.far;
-		spotLight.shadowCameraFov = 50;
-		spotLight.shadowBias = -0.00022;
-		spotLight.shadowDarkness = 0.5;
-		spotLight.shadowMapWidth = 1024;
-		spotLight.shadowMapHeight = 1024;
-		gameScene.scene.add( spotLight );
+		gameScene.fixedDirectionalLight = new THREE.DirectionalLight( 0xffffff, 1.5 );
+		gameScene.fixedDirectionalLight.position.copy( gameScene.camera.position );
+		gameScene.fixedDirectionalLight.position.setZ( 200 );
+		gameScene.fixedDirectionalLight.castShadow = true;
+		gameScene.fixedDirectionalLight.shadowCameraNear = 200;
+		gameScene.fixedDirectionalLight.shadowCameraFar = gameScene.camera.far;
+		gameScene.fixedDirectionalLight.shadowCameraFov = 50;
+		gameScene.fixedDirectionalLight.shadowBias = -0.0000001;
+		gameScene.fixedDirectionalLight.shadowDarkness = 0.3;
+		gameScene.fixedDirectionalLight.shadowMapWidth = 2048;
+		gameScene.fixedDirectionalLight.shadowMapHeight = 2048;
+
+		gameScene.scene.add( gameScene.fixedDirectionalLight );
 		
 		gameScene.spotLight = new THREE.SpotLight( 0xddddff, 2.5 );
 		gameScene.spotLight.castShadow = true;
@@ -81,8 +85,8 @@ GameSceneClass = Class.extend({
 		gameScene.spotLight.shadowCameraFov = 50;
 		gameScene.spotLight.shadowBias = -0.00022;
 		gameScene.spotLight.shadowDarkness = 0.5;
-		gameScene.spotLight.shadowMapWidth = 1024;
-		gameScene.spotLight.shadowMapHeight = 1024;
+		gameScene.spotLight.shadowMapWidth = 2048;
+		gameScene.spotLight.shadowMapHeight = 2048;
 		gameScene.scene.add( gameScene.spotLight );
 		
 		// ELEMENTS
@@ -137,8 +141,6 @@ GameSceneClass = Class.extend({
 			var line 	= Math.floor(i%3);
 			color		= gameScene.getRandomColor();
 
-//			material = new THREE.MeshPhongMaterial( { metal : true, ambient: 0x030303, color: color, specular: 0x009900, shininess: 10, shading: THREE.SmoothShading } );
-			
 			material = Physijs.createMaterial(
 				new THREE.MeshPhongMaterial( { metal : true, ambient: 0x030303, color: color, specular: 0x009900, shininess: 10, shading: THREE.SmoothShading } ),
 				.4, // low friction
@@ -174,6 +176,36 @@ GameSceneClass = Class.extend({
 		gameScene.stats.domElement.style.position = 'absolute';
 		gameScene.stats.domElement.style.top = '0px';
 		container.appendChild( gameScene.stats.domElement );
+		
+		// arrows
+		gameScene.arrows = new THREE.Object3D();
+		var aGeometry = new THREE.CylinderGeometry( 0, 4, 10, 10 );
+		var aMesh;
+		
+		var params = [  { x: gameScene.CUBE_DIMENSIONS.w, y:0, z:0, rX : 0, rY : 0, rZ : -90 * Math.PI/180, color : COLOR_RED },
+						{ x: -gameScene.CUBE_DIMENSIONS.w, y:0, z:0, rX : 0, rY : 0, rZ : 90 * Math.PI/180, color : COLOR_GREEN },
+						{ x: 0, y:0, z:-gameScene.CUBE_DIMENSIONS.d / 2 - 10, rX : -90 * Math.PI/180, rY : 0, rZ :0, color : COLOR_BLUE  },
+						{ x: 0, y:0, z:gameScene.CUBE_DIMENSIONS.d / 2 + 10, rX : 90 * Math.PI/180, rY : 0, rZ : 0, color : COLOR_YELLOW },
+						{ x: 0, y:gameScene.CUBE_DIMENSIONS.h, z:0, rX : 0, rY : 0, rZ : 0, color : COLOR_BLUE },
+						{ x: 0, y:-gameScene.CUBE_DIMENSIONS.h, z:0, rX : Math.PI, rY :0, rZ : 0, color : COLOR_YELLOW }
+					];
+
+		for ( i = 0; i < 6; i ++ ) {
+
+			aMesh = new THREE.Mesh( aGeometry, new THREE.MeshLambertMaterial( { color : params[i].color}) );
+			aMesh.position.x = params[i].x;
+			aMesh.position.y = params[i].y;
+			aMesh.position.z = params[i].z;
+			aMesh.rotation.x = params[i].rX;
+			aMesh.rotation.y = params[i].rY;
+			aMesh.rotation.z = params[i].rZ;
+			
+			gameScene.arrowsChildren.push( aMesh );
+			gameScene.arrows.add( aMesh );
+		}
+		
+		gameScene.scene.add( gameScene.arrows );
+		gameScene.arrows.position.copy( gameScene.objects[6][0].position );
 	},
 
 	resize : function() {
@@ -249,10 +281,17 @@ GameSceneClass = Class.extend({
 		gameScene.spotLight.position.copy( gameScene.camera.position );
 		gameScene.renderer.render( gameScene.scene, gameScene.camera );
 		
+		if ( connections.data.state >= PLAY_SELECT && connections.data.state <= PLAY_PLACE )
+			gameScene.showArrows()
+		else 
+			gameScene.hideArrows();
+		
 		gameScene.stats.update();
 	},
 	
 	select : function() {
+		
+//		gameScene.showUpDown();
 		
 		gameScene.actualObject = gameScene.objects[ gameScene.actualSelection.floor ][ gameScene.actualSelection.line ];
 		gameScene.makeTransparent();
@@ -260,12 +299,27 @@ GameSceneClass = Class.extend({
 
 	move : function( vector ) 
 	{
+		if( gameScene.actualSelection.floor % 2 === 1  )
+		{
+			var v = gameScene.actualObject.rotation.clone();
+			v.normalize();
+			vector.cross( v )
+		}
+			
 		gameScene.actualObject.setLinearVelocity( vector );
 	}, 
 		
-	place : function( vector ){
-
+	place : function( vector )
+	{
+		if( gameScene.actualSelection.floor % 2 === 1  )
+		{
+			var v = gameScene.actualObject.rotation.clone();
+			v.normalize();
+			vector.cross( v )
+		}
+		
 		vector.add( gameScene.actualObject.position );
+		
 		gameScene.actualObject.__dirtyPosition = true;
 		TweenMax.to( gameScene.actualObject.position, .5, { x : vector.x, y : vector.y, z : vector.z, onUpdate : function(){ 
 			gameScene.actualObject.__dirtyPosition = true; 
@@ -284,7 +338,7 @@ GameSceneClass = Class.extend({
 		gameScene.cameraControls.maxDistance = 500;
 		gameScene.cameraControls.minDistance = 50;
 		gameScene.cameraControls.center.copy( new THREE.Vector3(0,50,0))
-		gameScene.cameraControls.zoomIn(1.5)
+		gameScene.cameraControls.zoomIn(1)
 	}, 
 	
 	makeOpaque : function(){
@@ -299,6 +353,7 @@ GameSceneClass = Class.extend({
 				if ( gameScene.objects[i][j] && gameScene.objects[i][j] != gameScene.actualObject )
 				{
 					gameScene.objects[i][j].material.setValues( { color : gameScene.objects[i][j].originalColor } );
+					gameScene.objects[i][j].material.ambient 	= gameScene.objects[i][j].originalColor;
 					gameScene.objects[i][j].material.transparent = false;
 					gameScene.objects[i][j].material.opacity = 1;
 					gameScene.objects[i][j].castShadow 		= true;
@@ -313,6 +368,7 @@ GameSceneClass = Class.extend({
 		if( gameScene.actualObject )
 		{
 			gameScene.actualObject.material.setValues( { color : machine.getActiveUserData().color } );
+			gameScene.actualObject.material.ambient 	= gameScene.actualObject.material.color;
 			gameScene.actualObject.material.transparent = false;
 			gameScene.actualObject.material.opacity 	= 1;
 			gameScene.actualObject.castShadow 			= false;
@@ -326,6 +382,7 @@ GameSceneClass = Class.extend({
 				if ( gameScene.objects[i][j] && gameScene.objects[i][j] != gameScene.actualObject )
 				{
 					gameScene.objects[i][j].material.setValues( { color : COLOR_GRAY } );
+					gameScene.objects[i][j].material.ambient 	= gameScene.objects[i][j].material.color;
 					gameScene.objects[i][j].material.transparent = true;
 					gameScene.objects[i][j].material.opacity = .5;
 					gameScene.objects[i][j].castShadow 		= false;
@@ -333,11 +390,56 @@ GameSceneClass = Class.extend({
 				}
 			}
 		}
+		
+		gameScene.renderer.sortObjects = true;
 	}, 
 	
 	getRandomColor : function(){
 		return Math.random() * 0xAAAAAA;
-	}
+	},
+	
+	showArrows : function(){	
+	
+		if ( !gameScene.arrows.visible )
+		{
+			gameScene.scene.add( gameScene.arrows );
+			gameScene.arrows.visible = true;
+		}
+		
+		gameScene.arrows.position.copy( gameScene.actualObject.position );
+		gameScene.arrows.rotation.setY( -gameScene.actualObject.rotation.y );
+	},
+	
+	hideArrows : function(){	
+	
+		if ( gameScene.arrows.visible )
+		{
+			gameScene.scene.remove( gameScene.arrows );
+			gameScene.arrows.visible = false;
+		}
+	},
+	
+	showUpDown : function(){
+	
+		if( gameScene.arrowsChildren[2].parent )
+		{
+			gameScene.arrows.remove(gameScene.arrowsChildren[2]);
+			gameScene.arrows.remove(gameScene.arrowsChildren[3]);
+			gameScene.arrows.add(gameScene.arrowsChildren[4]); 
+			gameScene.arrows.add(gameScene.arrowsChildren[5]);
+		}
+	},
+	
+	showFrontBack : function(){
+	
+		if( !gameScene.arrowsChildren[2].parent )
+		{
+			gameScene.arrows.add(gameScene.arrowsChildren[2]);
+			gameScene.arrows.add(gameScene.arrowsChildren[3]);
+			gameScene.arrows.remove(gameScene.arrowsChildren[4]); 
+			gameScene.arrows.remove(gameScene.arrowsChildren[5]);
+		}
+	}	
 })
 
 var gameScene = new GameSceneClass();

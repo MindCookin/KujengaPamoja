@@ -78,6 +78,7 @@ GameBoardClass = Class.extend({
 		else if ( gameScene.actualSelection.line < 0 )
 			gameScene.actualSelection.line = lineArray.length - 1;
 		
+		gameScene.showUpDown();
 		gameScene.select(); 
 	},
 
@@ -85,6 +86,8 @@ GameBoardClass = Class.extend({
 		
 		if( gameBoard.checkedMove )
 			return;
+		
+		gameScene.showFrontBack();
 		
 		var vector = new THREE.Vector3;
 		switch( direction )
@@ -100,7 +103,6 @@ GameBoardClass = Class.extend({
 	
 	handlePlace : function( direction ){
 	
-		
 		if( gameBoard.checkedPlace )
 			return;
 	
@@ -204,8 +206,11 @@ GameBoardClass = Class.extend({
 			{
 				object = gameScene.objects[i][j];
 					
-				if( !gameBoard.haveLost && object && object._physijs && object != gameScene.actualObject )
+				if( !gameBoard.haveLost && object && object._physijs )
 				{
+					if( object == gameScene.actualObject && connections.data.state < CHECK_PLACE )
+						continue;
+				
 					gameBoard.center.setY( object.position.y );
 					distance = object.position.distanceTo( gameBoard.center );
 				

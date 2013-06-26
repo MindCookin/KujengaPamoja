@@ -39,16 +39,10 @@ MachineClass = Class.extend({
 		machine.setScreen();
 		
 		if ( connections.data.state == PLAY_SELECT )
-		{
-//			if ( connections.data.press >= 0 )
-				gameBoard.handleSelection( connections.data.press );
-			
-		} else if ( connections.data.state == PLAY_MOVE )
-		{
-			if ( connections.data.press >= 0 )
-				gameBoard.handleMove( connections.data.press );
-				
-		} else if ( connections.data.state == PLAY_PLACE )
+			gameBoard.handleSelection( connections.data.press );
+		else if ( connections.data.state == PLAY_MOVE )
+			gameBoard.handleMove( connections.data.press );
+		else if ( connections.data.state == PLAY_PLACE )
 			gameBoard.handlePlace( connections.data.press );	
 	},
 	

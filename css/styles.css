@@ -69,9 +69,13 @@ body.player.yellow{ background:#e7ac04; }
 	
 .btnArrow { height	: 50px; width : 50px; }
 	#btnUp { top : 0px; left : 90px; /*background : url('../images/upArrow.png') no-repeat center center;*/ }
+	#btnUp .arrow { width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-bottom: 20px solid #1561a9; position: absolute; bottom: 4px; right: 4px;}
 	#btnLeft { top : 90px; left : 0px; /*background : url('../images/leftArrow.png') no-repeat center center;*/  }
+	#btnLeft .arrow { width: 0; height: 0; border-bottom: 20px solid transparent; border-top: 20px solid transparent; border-right: 20px solid #3ba915; position: absolute; top: 4px; right: 4px;}
 	#btnDown { top : 170px; left : 90px; /*background : url('../images/downArrow.png') no-repeat center center;*/  }
+	#btnDown .arrow { width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 20px solid #e7ac04; position: absolute; top: 4px; right: 4px;}
 	#btnRight { top : 90px; left : 170px; /*background : url('../images/rightArrow.png') no-repeat center center;*/  }
+	#btnRight .arrow { width: 0; height: 0; border-bottom: 20px solid transparent; border-top: 20px solid transparent; border-left: 20px solid #a91515; position: absolute; top: 4px; left: 4px;}
 
 #playerButtons a.btnCenter { font: 30px/80px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; color: white; text-shadow:	2px 2px 0 #000;  height : 75px; width	: 75px; top : 75px; left : 75px; text-indent:0px; }
 
