@@ -102,6 +102,7 @@ class MoveOK(webapp2.RequestHandler):
 
 		if game and user:
 			game.state += 1
+			game.press = -1
 			game.put()
 			GameUpdater(game).send_update()
 

@@ -49,11 +49,7 @@ MachineClass = Class.extend({
 				gameBoard.handleMove( connections.data.press );
 				
 		} else if ( connections.data.state == PLAY_PLACE )
-		{
-			if ( connections.data.press >= 0 )
-				gameBoard.handlePlace( connections.data.press );
-				
-		} 
+			gameBoard.handlePlace( connections.data.press );	
 	},
 	
 	setScreen : function(){
@@ -157,18 +153,18 @@ MachineClass = Class.extend({
 		{
 			TweenMax.to( $(this), .5, { alpha : 1 } );
 			$(this).removeClass('transparent');
-			gameBoard.makeTransparent();
+			gameScene.makeTransparent();
 		}
 		else
 		{
 			TweenMax.to( $(this), .5, { alpha : .5 } );
 			$(this).addClass('transparent');
-			gameBoard.makeOpaque();
+			gameScene.makeOpaque();
 		}
 	},
 	
 	resetView : function( event ){
-		gameBoard.resetView();
+		gameScene.resetView();
 	}
 });
 
