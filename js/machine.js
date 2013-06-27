@@ -7,10 +7,14 @@ MachineClass = Class.extend({
 
 	start : function(){
 		
-		$('.btnSound').click( machine.toggleSound );
-		$('.btnTransparency').click( machine.toggleTransparency );
-		$('.btnResetView').click( machine.resetView );
+		$('.btnSound').click( machine.clickSound );
+		$('.btnTransparency').click( machine.clickTransparency );
+		$('.btnResetView').click( machine.clickView );
 		$('.btnPlay').click( machine.clickPlay );
+		$('.btnStats').click( machine.clickStats );
+		
+		$('#game_wrapper').mouseenter( machine.showGameInfo )
+		$('#game_wrapper').mouseleave( machine.hideGameInfo )
 		
 		connections.addEventListener("onMessage", machine.onMessageHandler );
 		connections.addEventListener("onClose", machine.onCloseHandler );
@@ -50,16 +54,16 @@ MachineClass = Class.extend({
 	
 		/** set active player **/
 		if ( connections.data.user1 && !$("#playersSidebar .red").hasClass("active") )
-			TweenMax.to( '#playersSidebar .red', .5, {marginLeft:0, onComplete : machine.addActiveClass, onCompleteParams : [  $('#playersSidebar .red')] } );
-		
+			machine.activate( "#playersSidebar .red" )
+			
 		if ( connections.data.user2 && !$("#playersSidebar .green").hasClass("active") )
-			TweenMax.to( '#playersSidebar .green', .5, {marginLeft:0, onComplete : machine.addActiveClass, onCompleteParams : [  $('#playersSidebar .green')] } );
-		
+			machine.activate( "#playersSidebar .green" )
+			
 		if ( connections.data.user3 && !$("#playersSidebar .blue").hasClass("active") )
-			TweenMax.to( '#playersSidebar .blue', .5, {marginLeft:0, onComplete : machine.addActiveClass, onCompleteParams : [  $('#playersSidebar .blue')] } );
-		
+			machine.activate( "#playersSidebar .blue" )
+			
 		if ( connections.data.user4 && !$("#playersSidebar .yellow").hasClass("active") )
-			TweenMax.to( '#playersSidebar .yellow', .5, {marginLeft:0, onComplete : machine.addActiveClass, onCompleteParams : [  $('#playersSidebar .yellow')] } );
+			machine.activate( "#playersSidebar .yellow" )
 			
 		/** set play button **/
 		if ( connections.data.state == READY && $('.btnPlay').css('display') == "none" )
@@ -81,6 +85,7 @@ MachineClass = Class.extend({
 		
 		if ( connections.data.state == PLAY_STARTGAME )
 		{
+			
 			$('#info_screen p').text( MACHINE_PLAYERSELECT.replace("[ACTIVE]", machine.getActiveUserData().name ) );
 			
 			TweenMax.to( '#initial_screen', .5, {scaleX:0,scaleY:0,ease:"Quint.easeIn"} );
@@ -89,11 +94,10 @@ MachineClass = Class.extend({
 			TweenMax.set( '#info_screen', { scaleX:0, scaleY:0 } );
 			TweenMax.to( '#info_screen', .5, { scaleX:1, scaleY:1, ease:"Quint.easeOut", autoAlpha : true} );	
 
-			$('body').removeClass( 'red green blue yellow');
 			$('#info_screen').removeClass( 'red green blue yellow');
 			
 			$('#info_screen').addClass( machine.getActiveUserData().className );
-			$('body').addClass( machine.getActiveUserData().className );
+			
 			
 			$('#playersSidebar li').each( function(){
 				if( $(this).hasClass( machine.getActiveUserData().className ) )
@@ -101,6 +105,8 @@ MachineClass = Class.extend({
 				else
 					$(this).text( PLAYER_WAIT );
 			});
+			
+			machine.showBackground();
 		}
 		
 		if ( connections.data.state == PLAY_MOVE )
@@ -111,7 +117,10 @@ MachineClass = Class.extend({
 			
 		if ( connections.data.state == CHECK_PLACE )	
 			$('#info_screen p').text( MACHINE_CHECKPLACE );
-			
+		
+
+		if( connections.data.state < PLAY_STARTGAME || connections.data.state > CHECK_PLACE )
+			machine.hideGameInfo();
 	},
 	
 	getActiveUserData : function(){
@@ -129,36 +138,104 @@ MachineClass = Class.extend({
 		target.addClass( 'active' );
 	},
 	
-	clickPlay : function( event ){
+	clickPlay : function( event )
+	{
+		event.preventDefault();
 		
 		if ( connections.data.state == LOOSE )
 			gameBoard.reset();
+		else	
+			machine.showGameInfo();
 		
 		connections.sendMessage('/startGame');
-		return false;
 	}, 
 	
-	toggleSound : function( event ){
+	clickSound : function( event )
+	{
+		event.preventDefault();
+		machine.toggleTransparency( $(this) );
+		
 		// TODO
 	}, 
 	
-	toggleTransparency : function( event ){
+	clickStats  :function( event )
+	{
+		event.preventDefault();
+		machine.toggleTransparency( $(this) );
+		
+		gameScene.toggleStats();
+	},
+	
+	clickTransparency : function( event )
+	{
+		event.preventDefault();
+		machine.toggleTransparency( $(this) );
+		
 		if ( $(this).hasClass('transparent'))
-		{
-			TweenMax.to( $(this), .5, { alpha : 1 } );
-			$(this).removeClass('transparent');
 			gameScene.makeTransparent();
+		else
+			gameScene.makeOpaque();
+	},
+	
+	clickView : function( event ){
+	
+		event.preventDefault();
+		
+		gameScene.resetView();
+		
+	},
+	
+	toggleTransparency : function( element ){
+	
+		if ( element.hasClass('transparent'))
+		{
+			TweenMax.to( element, .3, { alpha : 1 } );
+			element.removeClass('transparent');
 		}
 		else
 		{
-			TweenMax.to( $(this), .5, { alpha : .5 } );
-			$(this).addClass('transparent');
-			gameScene.makeOpaque();
+			TweenMax.to( element, .3, { alpha : .5 } );
+			element.addClass('transparent');
 		}
 	},
 	
-	resetView : function( event ){
-		gameScene.resetView();
+	showGameInfo  :function( event ){
+	
+		if( event )
+			event.preventDefault();
+		
+		if( connections.data.state >= PLAY_STARTGAME && connections.data.state <= CHECK_PLACE  )
+		{
+			TweenMax.to( '#toolbar', .5, { top : 0 } );
+			TweenMax.to( '#camera_controls_info', .5, { bottom : 0 } );
+		}
+	},
+	
+	hideGameInfo  :function( event ){
+	
+		if( event )
+			event.preventDefault();
+		
+		TweenMax.to( '#toolbar', .5, { top : -30 } );
+		TweenMax.to( '#camera_controls_info', .5, { bottom : -30 } );
+	},
+	
+	showBackground : function(){
+	
+		$('#game_background').removeClass( 'red green blue yellow');
+		TweenMax.set( '#game_background', { alpha : 0 } );
+		$('#game_background').addClass( machine.getActiveUserData().className )
+		
+		TweenMax.to( '#game_background', 2, { alpha : 1, onComplete : function(){
+			$('body').removeClass( 'red green blue yellow');
+			$('body').addClass( machine.getActiveUserData().className );
+		} } );
+		
+	},
+	
+	activate : function(name){
+		$(name + ' .tick').css('visibility', 'visible');
+		TweenMax.to( name, .5, {marginLeft:-150, onComplete : machine.addActiveClass, onCompleteParams : [  $(name)] } );
 	}
 });
 

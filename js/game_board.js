@@ -111,10 +111,10 @@ GameBoardClass = Class.extend({
 			var vector = new THREE.Vector3;
 			switch( direction )
 			{
-				case 0 : vector.z = -gameScene.CUBE_DIMENSIONS.w; break;	// up
-				case 1 : vector.x = -gameScene.CUBE_DIMENSIONS.w; break;	// left
-				case 2 : vector.z = gameScene.CUBE_DIMENSIONS.w; break;	// down
-				case 3 : vector.x = gameScene.CUBE_DIMENSIONS.w; break;	// right
+				case 0 : vector.z = -gameScene.CUBE_DIMENSIONS.w + 3; break;	// up
+				case 1 : vector.x = -gameScene.CUBE_DIMENSIONS.w + 3; break;	// left
+				case 2 : vector.z = gameScene.CUBE_DIMENSIONS.w + 3; break;	// down
+				case 3 : vector.x = gameScene.CUBE_DIMENSIONS.w + 3; break;	// right
 			}
 			
 			gameScene.place( vector );
@@ -185,7 +185,17 @@ GameBoardClass = Class.extend({
 		}
 		
 		if ( movingObjects === 0 )
+		{
+			if( gameScene.actualSelection.line > 0 &&
+				(gameScene.objects[ gameScene.actualSelection.floor][0].position.y < gameScene.actualObject.position.y - 5)
+				)
+			{
+				gameBoard.loose();
+				return;
+			}
+		
 			gameBoard.checkedPlace = true;
+		}
 	},
 	
 	checkLoose : function(){
@@ -218,17 +228,21 @@ GameBoardClass = Class.extend({
 						( object.rotation.y < 1 && distance > gameScene.CUBE_DIMENSIONS.w * 2.5 ) 
 						)
 					{
-						gameScene.cameraControls.autoRotate= true;
-						gameScene.cameraControls.userZoom = gameScene.cameraControls.userRotate = false;
-						
-						gameBoard.haveLost = true;
-						connections.sendMessage('/loose');
+						gameBoard.loose();
 						return;
 					}
 				}
 			}
 		}
 	}, 
+	
+	loose : function(){
+		gameScene.cameraControls.autoRotate= true;
+		gameScene.cameraControls.userZoom = gameScene.cameraControls.userRotate = false;
+		
+		gameBoard.haveLost = true;
+		connections.sendMessage('/loose');
+	},
 	
 	cleanAndStart : function(){
 		

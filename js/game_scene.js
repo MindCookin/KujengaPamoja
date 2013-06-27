@@ -3,6 +3,7 @@ GameSceneClass = Class.extend({
 	CUBE_DIMENSIONS : { w : 25, h : 15, d : 75 },
 	VIEWPORT_DIMENSIONS : { w : 0, h : 0 },
 
+	container	: null,
 	camera		: null, 
 	cameraControls: null, 
 	scene		: null,
@@ -31,7 +32,7 @@ GameSceneClass = Class.extend({
 		// variables definition
 		var block, color;
 		var i;
-		var container = document.getElementById( 'game_wrapper' );
+		gameScene.container = document.getElementById( 'game_wrapper' );
 		
 		// set dimensions
 		gameScene.VIEWPORT_DIMENSIONS = { w : $('#game_wrapper').width(), h : $('#game_wrapper').height() };
@@ -42,7 +43,7 @@ GameSceneClass = Class.extend({
 		gameScene.renderer.setSize( gameScene.VIEWPORT_DIMENSIONS.w, gameScene.VIEWPORT_DIMENSIONS.h );
 		gameScene.renderer.shadowMapEnabled = true;
 		gameScene.renderer.shadowMapType 	= THREE.PCFShadowMap;
-		container.appendChild( gameScene.renderer.domElement );
+		gameScene.container.appendChild( gameScene.renderer.domElement );
 
 		// camera
 		gameScene.camera = new THREE.PerspectiveCamera( 50, gameScene.VIEWPORT_DIMENSIONS.w / gameScene.VIEWPORT_DIMENSIONS.h, 1, 10000 );
@@ -100,34 +101,23 @@ GameSceneClass = Class.extend({
 		gameScene.ground.__dirtyPosition = true;
 		gameScene.scene.add( gameScene.ground );
 		
+		var wallData = [ 	{ x : 768/2, y: 0, z : 0, rX : -90*Math.PI/180, rY : -90*Math.PI/180, rZ: 0, color : COLOR_RED },
+							{ x : -768/2, y: 0, z : 0, rX : -90*Math.PI/180, rY : 90*Math.PI/180, rZ: 0, color : COLOR_GREEN },
+							{ x : 0, y: 0, z : -768/2, rX : 0, rY : 0, rZ: -90*Math.PI/180, color : COLOR_BLUE },
+							{ x : 0, y: 0, z : 768/2, rX : 0, rY : 180*Math.PI/180, rZ: 90*Math.PI/180, color : COLOR_YELLOW }
+							];
+		
 		// walls
 		for ( i = 0; i < 4; i++ )
 		{
 			var wallGeom = new THREE.PlaneGeometry( 768, 768/2 );
-			var wall = new Physijs.BoxMesh( groundGeom, new THREE.MeshPhongMaterial( { ambient: 0x030303, color: gameScene.getRandomColor(), specular: 0x009900, shininess: 10, shading: THREE.SmoothShading } ) );
+			var wall = new Physijs.BoxMesh( groundGeom, new THREE.MeshPhongMaterial( { ambient: 0x030303, color: wallData[i].color, specular: 0x009900, shininess: 10, shading: THREE.SmoothShading } ) );
 			wall.position.y = 768/2;
 			wall.material.ambient = 0x030303;
 			
-			if ( i == 0 )
-			{
-				wall.position.x = 768/2;
-				wall.rotation.x = -90*Math.PI/180;
-				wall.rotation.y = -90*Math.PI/180;
-			} else if ( i == 1 )
-			{
-				wall.position.x = -768/2;
-				wall.rotation.x = -90*Math.PI/180;
-				wall.rotation.y = 90*Math.PI/180;
-			} else if ( i == 2 )
-			{
-				wall.position.z = -768/2;
-				wall.rotation.z = -90*Math.PI/180;
-			} else if ( i == 3 )
-			{
-				wall.position.z = 768/2;
-				wall.rotation.z = 90*Math.PI/180;
-				wall.rotation.y = 180*Math.PI/180;
-			}
+			wall.position.set( wallData[i].x, wallData[i].y, wallData[i].z );
+			wall.rotation.set( wallData[i].rX, wallData[i].rY, wallData[i].rZ );
+			
 			wall.receiveShadow = true;
 			wall.__dirtyPosition = true;
 			gameScene.scene.add( wall );
@@ -156,7 +146,7 @@ GameSceneClass = Class.extend({
 			object.position.z = ( floor % 2 === 0 ) ? 0 : line * gameScene.CUBE_DIMENSIONS.w - ( gameScene.CUBE_DIMENSIONS.w ) ;
 
 			object.rotation.x = 0;
-			object.rotation.y = ( floor % 2 === 0 ) ? 0 : Math.PI / 2.01;
+			object.rotation.y = ( floor % 2 === 0 ) ? 0 : -Math.PI / 2.01;
 			object.rotation.z = 0;
 
 			object.castShadow 		= true;
@@ -175,7 +165,7 @@ GameSceneClass = Class.extend({
 		gameScene.stats = new Stats();
 		gameScene.stats.domElement.style.position = 'absolute';
 		gameScene.stats.domElement.style.top = '0px';
-		container.appendChild( gameScene.stats.domElement );
+//		gameScene.container.appendChild( gameScene.stats.domElement );
 		
 		// arrows
 		gameScene.arrows = new THREE.Object3D();
@@ -203,13 +193,14 @@ GameSceneClass = Class.extend({
 			gameScene.arrowsChildren.push( aMesh );
 			gameScene.arrows.add( aMesh );
 		}
-		
-		gameScene.scene.add( gameScene.arrows );
-		gameScene.arrows.position.copy( gameScene.objects[6][0].position );
+
+		$(window).resize( gameScene.resize );
 	},
 
 	resize : function() {
 
+		gameScene.VIEWPORT_DIMENSIONS = { w : $('#game_wrapper').width(), h : $('#game_wrapper').height() };
+		
 		gameScene.camera.aspect = gameScene.VIEWPORT_DIMENSIONS.w / gameScene.VIEWPORT_DIMENSIONS.h;
 		gameScene.camera.updateProjectionMatrix();
 
@@ -256,7 +247,7 @@ GameSceneClass = Class.extend({
 				block.position.z = ( floor % 2 === 0 ) ? 0 : line * gameScene.CUBE_DIMENSIONS.w - ( gameScene.CUBE_DIMENSIONS.w ) ;
 
 				block.rotation.x = 0;
-				block.rotation.y = ( floor % 2 === 0 ) ? 0 : Math.PI / 2.01;
+				block.rotation.y = ( floor % 2 === 0 ) ? 0 : -Math.PI / 2.01;
 				block.rotation.z = 0;
 				
 				block.__dirtyPosition = true;
@@ -304,6 +295,7 @@ GameSceneClass = Class.extend({
 			var v = gameScene.actualObject.rotation.clone();
 			v.normalize();
 			vector.cross( v )
+			vector.negate();
 		}
 			
 		gameScene.actualObject.setLinearVelocity( vector );
@@ -316,6 +308,7 @@ GameSceneClass = Class.extend({
 			var v = gameScene.actualObject.rotation.clone();
 			v.normalize();
 			vector.cross( v )
+			vector.negate();
 		}
 		
 		vector.add( gameScene.actualObject.position );
@@ -399,24 +392,15 @@ GameSceneClass = Class.extend({
 	},
 	
 	showArrows : function(){	
-	
-		if ( !gameScene.arrows.visible )
-		{
-			gameScene.scene.add( gameScene.arrows );
-			gameScene.arrows.visible = true;
-		}
-		
-		gameScene.arrows.position.copy( gameScene.actualObject.position );
-		gameScene.arrows.rotation.setY( -gameScene.actualObject.rotation.y );
+		if( !gameScene.arrows.parent || ( gameScene.actualObject != gameScene.arrows.parent ))
+			gameScene.actualObject.add( gameScene.arrows );
+			
 	},
 	
 	hideArrows : function(){	
 	
-		if ( gameScene.arrows.visible )
-		{
-			gameScene.scene.remove( gameScene.arrows );
-			gameScene.arrows.visible = false;
-		}
+//		if( gameScene.arrows.parent )
+//			gameScene.arrows.parent.remove( gameScene.arrows );
 	},
 	
 	showUpDown : function(){
@@ -439,7 +423,14 @@ GameSceneClass = Class.extend({
 			gameScene.arrows.remove(gameScene.arrowsChildren[4]); 
 			gameScene.arrows.remove(gameScene.arrowsChildren[5]);
 		}
-	}	
+	}, 
+
+	toggleStats : function(){
+		if( gameScene.container.contains( gameScene.stats.domElement ) )
+			gameScene.container.removeChild( gameScene.stats.domElement );
+		else
+			gameScene.container.appendChild( gameScene.stats.domElement );
+	}
 })
 
 var gameScene = new GameSceneClass();

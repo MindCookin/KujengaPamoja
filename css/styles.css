@@ -5,36 +5,44 @@
 /******************************************************************/
 /****************			MACHINE			***********************/
 /******************************************************************/
-body.machine{ background: url('../images/background.png'); }
-body.machine.red{ background: url('../images/background-red.png'); }
-body.machine.green{ background: url('../images/background-green.png'); }
-body.machine.blue{ background: url('../images/background-blue.png'); }
-body.machine.yellow{ background: url('../images/background-yellow.png'); }
+html, body, #global_wrapper{ height: 100%; margin: 0; width: 100%; padding : 0; overflow : hidden; }
+body.machine, #game_background { background: url('../images/background.png'); }
+body.machine.red, #game_background.red{ background: url('../images/background-red.png'); }
+body.machine.green, #game_background.green { background: url('../images/background-green.png'); }
+body.machine.blue, #game_background.blue { background: url('../images/background-blue.png'); }
+body.machine.yellow, #game_background.yellow { background: url('../images/background-yellow.png'); }
+
+#game_background{ position : absolute; width : 100%; height : 100%; top:0; left:0; }
+#global_wrapper{ position : relative; }
 
 h1 { margin : 19px auto; text-align: center; font: 70px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; color: white; text-shadow: 10px 10px #000000; }
 
-#game_wrapper { background:#FFFFFF; width:900px; height: 500px; margin: 15px auto 0 auto; position:relative; }
+#game_wrapper { background:#000000; 	width:85%; height: 70%; margin: 15px auto 0; position:relative; overflow : hidden }
 
-#toolbar{ position : absolute; top: 10px; right : 10px; margin : 0; padding : 0; }
-	#toolbar li { float : left; width : 30px; margin:0 5px; }
-	#toolbar a { display : block; width : 30px; height : 40px; text-indent : -1000px; overflow : hidden; }
-	.btnSound { background: url('../images/btnSound.png') no-repeat center center; }
-	.btnTransparency{ background: url('../images/btnTransparency.png') no-repeat center center; }
-	.btnResetView{ background: url('../images/btnResetView.png') no-repeat center center; }
-			
-#playersSidebar { position : absolute; top : 20%; left : 0px; list-style : none; margin : 0; padding : 0; z-index : 100; }
-	#playersSidebar li { display:block; margin-bottom: 20px; padding: 10px 45px 10px 10px; width: 165px; font: 30px/32px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; color: white;   background: url('../images/mobile-icon.png') 175px center no-repeat; margin-left : -150px; }
+#toolbar{ position : absolute; top: -30px; right : 0px; margin : 0; padding : 5px; background-color:rgba(0,0,0,0.5); }
+	#toolbar li { float : left; margin:0 4px; }
+	#toolbar a { display : block; text-indent : -1000px; overflow : hidden; }
+	.btnSound { width : 18px; height : 14px; background: url('../images/btnSound.png') no-repeat center center; }
+	.btnTransparency{ width : 17px; height : 17px; background: url('../images/btnTransparency.png') no-repeat center center; }
+	.btnResetView{ width : 14px; height : 16px; background: url('../images/btnResetView.png') no-repeat center center; }
+	.btnStats{ width : 20px; height : 18px; background: url('../images/btnStats.png') no-repeat center center; }
+
+#camera_controls_info { position : absolute; padding : 2px 15px; bottom : -30px; right : 0px; background-color:rgba(0,0,0,0.5); font: 11px Courier, Arial, Helvetica, sans-serif; color: #DDDDDD; text-shadow: 1px 1px #111111; margin : 0; }
+	
+#playersSidebar { position : absolute; top : 20%; left : 0px; list-style : none; margin : 0; padding : 0; z-index : 200; }
+	#playersSidebar li { position : relative; display:block; margin-bottom: 20px; padding: 10px 45px 10px 10px; width: 165px; font: 30px/32px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; color: white;   background: url('../images/mobile-icon.png') 165px center no-repeat; margin-left : -200px; }
 	#playersSidebar li.active{  margin-left : 0; } 
 	#playersSidebar li.red{ background-color:#a91515; }
 	#playersSidebar li.green{ background-color:#3ba915; }
 	#playersSidebar li.blue{ background-color:#1561a9; }
 	#playersSidebar li.yellow{ background-color:#e7ac04; }
+	#playersSidebar .tick{ visibility : hidden; background: url('../images/tick.png') center center no-repeat; position: absolute;bottom: 5px; right: -6px; width: 24px; height: 22px;	}
 
 #footer { position : fixed; bottom: 0; left : 0; overflow : hidden; padding:0; margin : 0; width:100%;}
 	#footer a { display:block; background: black; color: white; font: 20px/32px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; padding : 5px; text-align:center; margin : 0; text-decoration : none;}
 	#footer a:hover {background: white; color: black;}
 
-.popup { margin : 10px 160px 0px; padding : 0px 20px 30px; color:white; font: 20px/25px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; position : absolute; top: 50px; left : 10px; z-index : 110; background: #a91515 url('../images/bgPixelLine.png') bottom left repeat-x; width:500px; }	
+.popup { margin : 0px; padding : 0px 20px 30px; color:white; font: 20px/25px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; position : absolute; top: 25%; left : 25%; z-index : 110; background: #a91515 url('../images/bgPixelLine.png') bottom left repeat-x; width:50%; }	
 	.popup p{}
 	.popup h3, .popup a.url{ color:#e7ac04; text-shadow: 3px 3px #000000;}
 	.popup a.url:hover{ color:#e3db04;}
@@ -45,7 +53,7 @@ h1 { margin : 19px auto; text-align: center; font: 70px 'CommandoCommando', Aria
 #stats_screen{ visibility : hidden; }
 	#stats_screen  a.btnPlay { width : 250px; }
 	
-#info_screen{ margin : 350px 60px 0px; width : 700px;  padding : 0px 20px; visibility:hidden }
+#info_screen{ top : inherit; bottom : 25%; padding : 0px 20px; visibility:hidden; }
 	#info_screen.red{ background:#a91515; }
 	#info_screen.green{ background:#3ba915; }
 	#info_screen.blue{ background:#1561a9; }

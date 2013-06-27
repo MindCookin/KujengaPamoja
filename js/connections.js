@@ -8,7 +8,7 @@ ConnectionClass = EventBusClass.extend({
 				
 	sendMessage : function(path, opt_param) {
 		
-		path += '?g=' + connections.game_key;
+		path += '?g=' + connections.game_key + '&u=' + connections.me;
 		
 		if (opt_param) {
 			path += '&' + opt_param;

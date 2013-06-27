@@ -68,7 +68,7 @@ class GameFromRequest():
 	game = None;
 
 	def __init__(self, request):
-		user = users.get_current_user()
+		user = request.get('u')
 		game_key = request.get('g')
 		if user and game_key:
 			self.game = Game.get_by_key_name(game_key)
@@ -80,7 +80,7 @@ class Pressed(webapp2.RequestHandler):
 
 	def post(self):
 		game = GameFromRequest(self.request).get_game()
-		user = users.get_current_user()
+		user = self.request.get('u')
 
 		if game and user:
 			keyPressed = int( self.request.get('press') )
@@ -98,7 +98,7 @@ class MoveOK(webapp2.RequestHandler):
 
 	def post(self):
 		game = GameFromRequest(self.request).get_game()
-		user = users.get_current_user()
+		user = self.request.get('u')
 
 		if game and user:
 			game.state += 1
@@ -111,7 +111,7 @@ class Released(webapp2.RequestHandler):
 
 	def post(self):
 		game = GameFromRequest(self.request).get_game()
-		user = users.get_current_user()
+		user = self.request.get('u')
 
 		if game and user:
 			game.press = -1;
@@ -128,20 +128,21 @@ class Closed(webapp2.RequestHandler):
 
 	def post(self):
 		game = GameFromRequest(self.request).get_game()
-		user = users.get_current_user()
+		user = self.request.get('u')
 		
 		if game and user:
-			if game.user1 	== user.user_id() :game.user1 = ""
-			elif game.user2 == user.user_id() :game.user2 = ""
-			elif game.user3 == user.user_id() :game.user3 = ""
-			elif game.user4 == user.user_id() :game.user4 = ""
+			if game.user1 	== user :game.user1 = ""
+			elif game.user2 == user :game.user2 = ""
+			elif game.user3 == user :game.user3 = ""
+			elif game.user4 == user :game.user4 = ""
 			game.put();
 		
-			GameUpdater(game).send_close( user.user_id() )
+			GameUpdater(game).send_close( user )
 		
 class StartGame(webapp2.RequestHandler):
 
 	def post(self):
+		
 		game = GameFromRequest(self.request).get_game()
 		game.state = 2
 		
@@ -180,17 +181,21 @@ class Main(webapp2.RequestHandler):
 
     def get(self):
 		
-		user = users.get_current_user()
+		#user = users.get_current_user()
+		user = self.request.get('u')
 		
 		if not user:
-			self.redirect(users.create_login_url(self.request.uri))	
-			return
+			user = id_generator(21, string.digits )
+			#self.redirect(users.create_login_url(self.request.uri))	
+			#return
 			
 		#Si hay game_key, significa que es un jugador
 		#Si no hay game_key, es la maquina
 		
 		game_key = self.request.get('g') 
-		user_id = user.user_id()
+		#user_id = user.user_id()
+		
+		logging.info('USER:' + self.request.get('u') )
 		
 		if not game_key :
 			
@@ -199,7 +204,7 @@ class Main(webapp2.RequestHandler):
 			# y creo un nuevo Game
 			game = Game(
 				key_name = game_key,
-				machine = user_id,
+				machine = user,
 				state	= 0
 			)
 			game.put()
@@ -209,16 +214,16 @@ class Main(webapp2.RequestHandler):
 			game = Game.get_by_key_name(game_key)
 			
 			#compruebo si existe usuario
-			if user_id != game.user1 and user_id != game.user2 and user_id != game.user3 and user_id != game.user4 :
+			if user != game.user1 and user != game.user2 and user != game.user3 and user != game.user4 :
 				# creo el usuario si no existe
 				if not game.user1 :
-					game.user1 = user_id
+					game.user1 = user
 				elif not game.user2 :
-					game.user2 = user_id
+					game.user2 = user
 				elif not game.user3 :
-					game.user3 = user_id
+					game.user3 = user
 				elif not game.user4 :
-					game.user4 = user_id
+					game.user4 = user
 				
 				if game.state == 0:
 					game.state = 1
@@ -231,7 +236,7 @@ class Main(webapp2.RequestHandler):
 				return
 				
 		#recojo el token
-		token = channel.create_channel( user_id + game_key )
+		token = channel.create_channel( user + game_key )
 		
 		#creo la URL
 		game_url = "http://localhost:11080/?g=" + game_key
@@ -246,7 +251,7 @@ class Main(webapp2.RequestHandler):
 			'user2': 	game.user2,
 			'user3': 	game.user3,
 			'user4': 	game.user4,
-			'me': user_id
+			'me': user
 		}
 		
 		if self.request.get('g'):

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {% autoescape true %}
-<html lang="en">
+<html lang="en" class="machine">
 	<head>
 		<meta charset="utf-8" />
 
@@ -46,15 +46,26 @@
 	</head>
 
 	<body class="machine">
-	
-		<h1>kujenga pamoja</h1>
 		
-		<div id="game_wrapper" class="box-shadowed">
-			<ul id="toolbar">
-				<li><a class="btnResetView" href="#">Reset View</a></li>
-				<li><a class="btnTransparency" href="#">Transparency on/off</a></li>
-				<li><a class="btnSound" href="#">Sound on/off</a></li>
-			</ul>
+		<div id="game_background"></div>
+		<div id="global_wrapper">
+		
+			<div id="title_wrapper">
+				<h1>kujenga pamoja</h1>
+			</div>
+			
+			<div id="game_wrapper" class="box-shadowed">
+				<ul id="toolbar">
+					<li><a class="btnStats" href="#" title="View Stats">View Stats</a></li>
+					<li><a class="btnResetView" href="#" title="Reset View">Reset View</a></li>
+					<li><a class="btnTransparency" href="#" title="Toggle Transparency">Toggle Transparency</a></li>
+				<!--<li><a class="btnSound" href="#" title="Toggle Sounds">Toggle Sounds</a></li>	-->
+				</ul>
+				
+				<!------------------------------------ CAMERA CONTROLS INFO -->
+				<p id="camera_controls_info">Click and drag with your mouse to move the camera. Use mouse wheel for zoom control.</p>
+			</div>
+			
 			<!-------------------------------------- INITIAL SCREEN	-->
 			<div id="initial_screen" class="popup box-shadowed">
 				<p>kujenga pamoja is an interactive experience to play with your friends. Open Google chrome in your smartphones and go to:</p>
@@ -75,32 +86,32 @@
 				<p>pasdpokpokapos dkpokpokas dppaoks auij pjoij oiajs doijpoiaj doisjpoaisj doijaps d</p>
 			</div> 
 			
-		</div>
-		
-		<ul id="playersSidebar">
-			<li class="red box-shadowed">Player Connected</li>
-			<li class="green box-shadowed">Player Connected</li>
-			<li class="blue box-shadowed">Player Connected</li>
-			<li class="yellow box-shadowed">Player Connected</li>
-		</ul>
-		
-		<div id="footer"><a href="#">&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS</a></div>
-	
-		<script type="text/javascript">
+			<ul id="playersSidebar">
+				<li class="red box-shadowed">Player Connected<div class="tick"></div></li>
+				<li class="green box-shadowed">Player Connected<div class="tick"></div></li>
+				<li class="blue box-shadowed">Player Connected<div class="tick"></div></li>
+				<li class="yellow box-shadowed">Player Connected<div class="tick"></div></li>
+			</ul>
 			
-			connections.game_key 	= '{{ game_key }}';
-			connections.me			= '{{ me }}';
+			<div id="footer"><a href="#">&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS</a></div>
+		
+			<script type="text/javascript">
 				
-			$( function(){
-			
-				gameBoard.start();
-				gameBoard.animate();
+				connections.game_key 	= '{{ game_key }}';
+				connections.me			= '{{ me }}';
+					
+				$( function(){
+				
+					gameBoard.start();
+					gameBoard.animate();
 
-				machine.start();
+					machine.start();
+				
+					TweenMax.delayedCall( .1, connections.initialize, [ '{{ token }}' ] );
+				});
+			</script>
 			
-				TweenMax.delayedCall( .1, connections.initialize, [ '{{ token }}' ] );
-			});
-		</script>
+		</div>	
 	</body>
 </html>
 {% endautoescape %}
