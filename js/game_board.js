@@ -310,14 +310,29 @@ GameBoardClass = Class.extend({
 		targetRotation.y = ( floor % 2 === 0 ) ? 0 : Math.PI / 2.01;
 		targetRotation.z = 0;
 
-		gameScene.actualObject.position.copy( targetPosition );
-		gameScene.actualObject.rotation.copy( targetRotation );
-		gameScene.actualObject.__dirtyPosition = true;
-		gameScene.actualObject.__dirtyRotation = true;
+//		gameScene.actualObject.position.copy( targetPosition );
+//		gameScene.actualObject.rotation.copy( targetRotation );
+//		gameScene.actualObject.__dirtyPosition = true;
+//		gameScene.actualObject.__dirtyRotation = true;
 		
+		gameScene.checkSimulation = false;
 		gameScene.renderer.sortObjects = true;
 		
-		connections.sendMessage('/moveOK');
+		gameScene.actualObject.__dirtyPosition = true;
+		TweenMax.to( gameScene.actualObject.position, .5, { x : targetPosition.x, y : targetPosition.y, z : targetPosition.z, onUpdate : function(){ 
+			gameScene.actualObject.__dirtyPosition = true; 
+			gameScene.renderer.sortObjects = true;
+			} } )
+		
+		gameScene.actualObject.__dirtyRotation = true;
+		TweenMax.to( gameScene.actualObject.rotation, .5, { 
+					x : targetRotation.x, y : targetRotation.y, z : targetRotation.z, 
+					onUpdate : function(){ 	gameScene.actualObject.__dirtyRotation = true; }, 
+					onComplete : function(){ 
+						connections.sendMessage('/moveOK');
+						gameScene.checkSimulation = true;
+					} } )	
+		
 		
 		sndManager.playSoundInstance( '/sounds/lift.mp3', false );
 	}

@@ -20,6 +20,7 @@ GameSceneClass = Class.extend({
 	objects 	: [],
 	ground 		: null,
 	actualObject: null,
+	checkSimulation : true,
 	
 	initialObjects : 20,
 
@@ -101,10 +102,10 @@ GameSceneClass = Class.extend({
 		gameScene.ground.__dirtyPosition = true;
 		gameScene.scene.add( gameScene.ground );
 		
-		var wallData = [ 	{ x : 768/2, y: 0, z : 0, rX : -90*Math.PI/180, rY : -90*Math.PI/180, rZ: 0, color : COLOR_RED },
-							{ x : -768/2, y: 0, z : 0, rX : -90*Math.PI/180, rY : 90*Math.PI/180, rZ: 0, color : COLOR_GREEN },
-							{ x : 0, y: 0, z : -768/2, rX : 0, rY : 0, rZ: -90*Math.PI/180, color : COLOR_BLUE },
-							{ x : 0, y: 0, z : 768/2, rX : 0, rY : 180*Math.PI/180, rZ: 90*Math.PI/180, color : COLOR_YELLOW }
+		var wallData = [ 	{ x : 768/2, y: 0, z : 0, rX : -90*Math.PI/180, rY : -90*Math.PI/180, rZ: 0, color : 0x890505 },
+							{ x : -768/2, y: 0, z : 0, rX : -90*Math.PI/180, rY : 90*Math.PI/180, rZ: 0, color : 0x1b8905 },
+							{ x : 0, y: 0, z : -768/2, rX : 0, rY : 0, rZ: -90*Math.PI/180, color : 0x053189 },
+							{ x : 0, y: 0, z : 768/2, rX : 0, rY : 180*Math.PI/180, rZ: 90*Math.PI/180, color : 0xa78c04 }
 							];
 		
 		// walls
@@ -267,7 +268,7 @@ GameSceneClass = Class.extend({
 
 	render : function() {
 	
-		if ( connections.data.state != PLAY_PLACE )
+		if ( connections.data.state != PLAY_PLACE && gameScene.checkSimulation )
 			gameScene.scene.simulate( 1.5, 5 );
 		
 		gameScene.cameraControls.update();

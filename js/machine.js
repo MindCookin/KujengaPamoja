@@ -91,6 +91,9 @@ MachineClass = Class.extend({
 		{
 			TweenMax.set( '#initial_screen .btnPlay', {alpha:0, scaleY : 0, display:"block"} );
 			TweenMax.to( '#initial_screen .btnPlay', .5, {alpha:1, scaleY : 1, autoAlpha : true } );
+			
+			TweenMax.set( '#initial_screen .startFun', {alpha:0, display:"block"} );
+			TweenMax.to( '#initial_screen .startFun', .5, {alpha:1, autoAlpha : true } );
 		}
 		
 		if( connections.data.state == LOOSE )
@@ -102,11 +105,15 @@ MachineClass = Class.extend({
 			
 			TweenMax.set( '#stats_screen', {scaleX:0,scaleY:0} );
 			TweenMax.to( '#stats_screen', .5, {scaleX:1,scaleY:1, autoAlpha : true } );
+			
+			var mText = FINAL_SENTENCES[ Math.floor( Math.random() * FINAL_SENTENCES.length ) ];
+			mText = mText.replace("[ACTIVE]", machine.getActiveUserData().name );
+			mText = mText.replace("[FLOOR]", gameScene.objects.length );
+			$('#stats_screen .sentence').html( mText );
 		}
 		
 		if ( connections.data.state == PLAY_STARTGAME )
 		{
-			
 			$('#info_screen p').text( MACHINE_PLAYERSELECT.replace("[ACTIVE]", machine.getActiveUserData().name ) );
 			
 			TweenMax.to( '#initial_screen', .5, {scaleX:0,scaleY:0,ease:"Quint.easeIn"} );
@@ -227,8 +234,8 @@ MachineClass = Class.extend({
 		
 		if( connections.data.state >= PLAY_STARTGAME && connections.data.state <= CHECK_PLACE  )
 		{
-			TweenMax.to( '#toolbar', .5, { top : 0 } );
-			TweenMax.to( '#camera_controls_info', .5, { bottom : 0 } );
+			TweenMax.to( '#toolbar', .3, { alpha : 1, autoAlpha : true } );
+			TweenMax.to( '#camera_controls_info', .3, { alpha : 1, autoAlpha : true } );
 		}
 	},
 	
@@ -237,8 +244,8 @@ MachineClass = Class.extend({
 		if( event )
 			event.preventDefault();
 		
-		TweenMax.to( '#toolbar', .5, { top : -30 } );
-		TweenMax.to( '#camera_controls_info', .5, { bottom : -30 } );
+		TweenMax.to( '#toolbar', .3, { alpha : 0 } );
+		TweenMax.to( '#camera_controls_info', .3, { alpha : 0 } );
 	},
 	
 	showBackground : function(){
@@ -264,7 +271,7 @@ MachineClass = Class.extend({
 	shortenURL: function()
 	{
 		$.ajax({
-			url: 'https://www.googleapis.com/urlshortener/v1/url?shortUrl=http://goo.gl/fbsS&key=AIzaSyAmTrBl5DTn4cYjx7YAKAScb0KIImJb9Jo',
+			url: 'https://www.googleapis.com/urlshortener/v1/url?shortUrl=http://goo.gl/fbsS&key=AIzaSyB1Q-_z_lOa8dbdaERT13LnHyDllGoONbs',
 			type: 'POST',
 			contentType: 'application/json; charset=utf-8',
 			data: '{ longUrl: "' + connections.game_url +'"}',

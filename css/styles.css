@@ -1,6 +1,6 @@
-
-/******** FONT : Commando on fontsquirrel 								**********/
-/******** MOBILE ICON : http://www.clker.com/clipart-mobile-icon.html 	**********/
+/*********************************************************************************************/ 
+/******** Commando Font from fontsquirrel ( www.fontsquirrel.com/fonts/Commando )	**********/
+/*********************************************************************************************/
 
 /******************************************************************/
 /****************			MACHINE			***********************/
@@ -19,7 +19,7 @@ h1 { margin : 19px auto; text-align: center; font: 70px 'CommandoCommando', Aria
 
 #game_wrapper { background:#000000; 	width:85%; height: 70%; margin: 15px auto 0; position:relative; overflow : hidden }
 
-#toolbar{ position : absolute; top: -30px; right : 0px; margin : 0; padding : 5px; background-color:rgba(0,0,0,0.5); }
+#toolbar{ position : absolute; top: 0px; right : 0px; margin : 0; padding : 5px; background-color:rgba(0,0,0,0.5); visibility : hidden;}
 	#toolbar li { float : left; margin:0 4px; }
 	#toolbar a { display : block; text-indent : -1000px; overflow : hidden; }
 	.btnSound { width : 18px; height : 14px; background: url('../images/btnSound.png') no-repeat center center; }
@@ -27,7 +27,7 @@ h1 { margin : 19px auto; text-align: center; font: 70px 'CommandoCommando', Aria
 	.btnResetView{ width : 14px; height : 16px; background: url('../images/btnResetView.png') no-repeat center center; }
 	.btnStats{ width : 20px; height : 18px; background: url('../images/btnStats.png') no-repeat center center; }
 
-#camera_controls_info { position : absolute; padding : 2px 15px; bottom : -30px; right : 0px; background-color:rgba(0,0,0,0.5); font: 11px Courier, Arial, Helvetica, sans-serif; color: #DDDDDD; text-shadow: 1px 1px #111111; margin : 0; }
+#camera_controls_info { position : absolute; padding : 2px 15px; bottom : 0px; right : 0px; background-color:rgba(0,0,0,0.5); font: 11px Courier, Arial, Helvetica, sans-serif; color: #DDDDDD; text-shadow: 1px 1px #111111; margin : 0; visibility : hidden; }
 	
 #playersSidebar { position : absolute; top : 20%; left : 0px; list-style : none; margin : 0; padding : 0; z-index : 200; }
 	#playersSidebar li { position : relative; display:block; margin-bottom: 20px; padding: 20px 45px 20px 10px; width: 165px; font: 0px/32px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; color: white;   background: url('../images/mobile-icon.png') 165px center no-repeat; margin-left : -200px; }
@@ -42,10 +42,11 @@ h1 { margin : 19px auto; text-align: center; font: 70px 'CommandoCommando', Aria
 	#footer p.credits{ display:block; background: black; color: white; font: 20px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; padding : 10px 5px; text-align:center; margin : 0; text-decoration : none;}
 /*	#footer p:hover {background: white; color: black;} */ 
 	#footer p.creditsInfo { background: black; color: #999999; font: 11px Courier, Arial, sans-serif;letter-spacing: 0; padding : 10px; text-align:justify; margin : 0; text-decoration : none;}
-	#footer a.me { color:#e7ac04; }
-	#footer a.me:hover { color:#e3db04; }
+	
 	#footer a{ color:#AAAAAA; }
 	#footer a:hover{ color:#BBBBBB; }
+	#footer a.me { color:#e7ac04; }
+	#footer a.me:hover { color:#e3db04; }
 
 .popup { margin : 0px; padding : 0px 20px 30px; color:white; font: 20px/25px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; position : absolute; top: 25%; left : 25%; z-index : 110; background: #a91515 url('../images/bgPixelLine.png') bottom left repeat-x; width:50%; }	
 	.popup p{}
@@ -63,6 +64,8 @@ h1 { margin : 19px auto; text-align: center; font: 70px 'CommandoCommando', Aria
 	#info_screen.green{ background:#3ba915; }
 	#info_screen.blue{ background:#1561a9; }
 	#info_screen.yellow{ background:#e7ac04; }
+
+.startFun { display : none; visibility : hidden; }
 	
 /******************************************************************/
 /****************			PLAYER			***********************/
