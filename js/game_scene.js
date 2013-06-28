@@ -39,7 +39,13 @@ GameSceneClass = Class.extend({
 		gameScene.VIEWPORT_DIMENSIONS = { w : $('#game_wrapper').width(), h : $('#game_wrapper').height() };
 		
 		// renderer
-		gameScene.renderer = new THREE.WebGLRenderer( { antialias: true } );
+		try {
+			gameScene.renderer = new THREE.WebGLRenderer( { antialias: true } );
+		} catch(error) {
+			alert( "Three.js WebGLRenderer is not supported on your browser. Please open Kujenga Pamonga on Google Chrome to see the full experience.");
+			return;
+		}
+		
 		gameScene.renderer.sortObjects = false;
 		gameScene.renderer.setSize( gameScene.VIEWPORT_DIMENSIONS.w, gameScene.VIEWPORT_DIMENSIONS.h );
 		gameScene.renderer.shadowMapEnabled = true;
@@ -401,9 +407,8 @@ GameSceneClass = Class.extend({
 	},
 	
 	hideArrows : function(){	
-	
-//		if( gameScene.arrows.parent )
-//			gameScene.arrows.parent.remove( gameScene.arrows );
+		if( gameScene.arrows.parent )
+			gameScene.arrows.parent.remove( gameScene.arrows );
 	},
 	
 	showUpDown : function(){

@@ -279,10 +279,12 @@ MachineClass = Class.extend({
 			success: function(response) {
 				$('.url').text( response.id );
 				$('.url').attr( 'href', response.id );
+				$('#camera_controls_info span').text( response.id );
 			},
 			error :  function(response) {
 				$('.url').text( connections.game_url );
 				$('.url').attr( 'href', connections.game_url );
+				$('#camera_controls_info span').text( connections.game_url );
 			}
 		});	
 	}
