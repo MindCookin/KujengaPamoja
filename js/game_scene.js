@@ -152,6 +152,8 @@ GameSceneClass = Class.extend({
 			object.castShadow 		= true;
 			object.receiveShadow 	= true;
 			object.__dirtyPosition 	= true;
+			
+			object.addEventListener( 'collision', gameScene.collideBlocks );
 
 			gameScene.scene.add( object );
 			
@@ -430,6 +432,12 @@ GameSceneClass = Class.extend({
 			gameScene.container.removeChild( gameScene.stats.domElement );
 		else
 			gameScene.container.appendChild( gameScene.stats.domElement );
+	},
+	
+	collideBlocks : function(){
+		
+		if ( connections.data.state >= PLAY_MOVE && connections.data.state <= CHECK_PLACE )	
+			sndManager.playSoundInstance( '/sounds/hit.mp3', false, .2 );
 	}
 })
 

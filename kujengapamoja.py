@@ -239,7 +239,7 @@ class Main(webapp2.RequestHandler):
 		token = channel.create_channel( user + game_key )
 		
 		#creo la URL
-		game_url = "http://localhost:11080/?g=" + game_key
+		game_url = self.request.url + "?g=" + game_key
 		
 		# Actualizo el HTML:
 		template_values = {

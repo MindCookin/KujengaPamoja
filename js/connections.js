@@ -1,5 +1,6 @@
 ConnectionClass = EventBusClass.extend({
 
+	game_url 	: null,
 	game_key 	: null,
 	me 			: null,
 	data 		: {},

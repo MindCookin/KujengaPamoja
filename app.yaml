@@ -11,6 +11,8 @@ handlers:
   static_dir: css
 - url: /js
   static_dir: js
+- url: /sounds
+  static_dir: sounds
 - url: /.*
   script: kujengapamoja.application
   

@@ -7,6 +7,8 @@ MachineClass = Class.extend({
 
 	start : function(){
 		
+		machine.shortenURL();
+		
 		$('.btnSound').click( machine.clickSound );
 		$('.btnTransparency').click( machine.clickTransparency );
 		$('.btnResetView').click( machine.clickView );
@@ -18,6 +20,9 @@ MachineClass = Class.extend({
 		
 		connections.addEventListener("onMessage", machine.onMessageHandler );
 		connections.addEventListener("onClose", machine.onCloseHandler );
+		
+		sndManager.create();
+		sndManager.playSoundInstance( '/sounds/background.mp3', true );
 	},
 	
 	onCloseHandler : function(){
@@ -41,6 +46,7 @@ MachineClass = Class.extend({
 	onMessageHandler : function() {
 		
 		machine.setScreen();
+		machine.playSound();
 		
 		if ( connections.data.state == PLAY_SELECT )
 			gameBoard.handleSelection( connections.data.press );
@@ -48,6 +54,21 @@ MachineClass = Class.extend({
 			gameBoard.handleMove( connections.data.press );
 		else if ( connections.data.state == PLAY_PLACE )
 			gameBoard.handlePlace( connections.data.press );	
+	},
+	
+	playSound : function(){
+		
+		if ( connections.data.state == PLAY_STARTGAME )
+			sndManager.playSoundInstance( '/sounds/win.mp3', false );
+		
+		if ( ( connections.data.state == PLAY_SELECT || connections.data.state == PLAY_PLACE ) && connections.data.press >= 0 )	
+			sndManager.playSoundInstance( '/sounds/pop.mp3', false, .4 );
+			
+		if ( ( connections.data.state == PLAY_MOVE || connections.data.state == CHECK_PLACE )  && connections.data.press == -1 )	
+			sndManager.playSoundInstance( '/sounds/blip.mp3', false );
+			
+		if ( connections.data.state == LOOSE )
+			sndManager.playSoundInstance( '/sounds/lifelost.mp3', false );
 	},
 	
 	setScreen : function(){
@@ -155,7 +176,7 @@ MachineClass = Class.extend({
 		event.preventDefault();
 		machine.toggleTransparency( $(this) );
 		
-		// TODO
+		sndManager.toggleMute();
 	}, 
 	
 	clickStats  :function( event )
@@ -236,6 +257,27 @@ MachineClass = Class.extend({
 	activate : function(name){
 		$(name + ' .tick').css('visibility', 'visible');
 		TweenMax.to( name, .5, {marginLeft:-150, onComplete : machine.addActiveClass, onCompleteParams : [  $(name)] } );
+		
+		sndManager.playSoundInstance( '/sounds/blip.mp3', false );
+	}, 
+	
+	shortenURL: function()
+	{
+		$.ajax({
+			url: 'https://www.googleapis.com/urlshortener/v1/url?shortUrl=http://goo.gl/fbsS&key=AIzaSyAmTrBl5DTn4cYjx7YAKAScb0KIImJb9Jo',
+			type: 'POST',
+			contentType: 'application/json; charset=utf-8',
+			data: '{ longUrl: "' + connections.game_url +'"}',
+			dataType: 'json',
+			success: function(response) {
+				$('.url').text( response.id );
+				$('.url').attr( 'href', response.id );
+			},
+			error :  function(response) {
+				$('.url').text( connections.game_url );
+				$('.url').attr( 'href', connections.game_url );
+			}
+		});	
 	}
 });
 

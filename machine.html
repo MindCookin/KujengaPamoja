@@ -27,11 +27,11 @@
 		<script type="text/javascript" src="js/libs/three.min.js"></script>
 		<script type="text/javascript" src="js/libs/physi.js"></script>
 		<script type="text/javascript" src="js/libs/stats.min.js"></script>
-		<script type="text/javascript" src="js/controls/TrackballControls.js"></script>
 		<script type="text/javascript" src="js/controls/OrbitControls.js"></script>
 		<script type="text/javascript" src='/js/libs/greensock/TweenMax.min.js'></script>
 		
 		<script type="text/javascript" src="js/core.js"></script>
+		<script type="text/javascript" src="js/utils/SoundManager.js"></script>
 		<script type="text/javascript" src="js/utils/EventBus.js"></script>
 		<script type="text/javascript" src="js/connections.js"></script>
 		<script type="text/javascript" src="js/game_scene.js"></script>
@@ -47,7 +47,7 @@
 
 	<body class="machine">
 		
-		<div id="game_background"></div>
+		<div id="game_background"></div> 
 		<div id="global_wrapper">
 		
 			<div id="title_wrapper">
@@ -59,7 +59,7 @@
 					<li><a class="btnStats" href="#" title="View Stats">View Stats</a></li>
 					<li><a class="btnResetView" href="#" title="Reset View">Reset View</a></li>
 					<li><a class="btnTransparency" href="#" title="Toggle Transparency">Toggle Transparency</a></li>
-				<!--<li><a class="btnSound" href="#" title="Toggle Sounds">Toggle Sounds</a></li>	-->
+					<li><a class="btnSound" href="#" title="Toggle Sounds">Toggle Sounds</a></li>	
 				</ul>
 				
 				<!------------------------------------ CAMERA CONTROLS INFO -->
@@ -69,7 +69,7 @@
 			<!-------------------------------------- INITIAL SCREEN	-->
 			<div id="initial_screen" class="popup box-shadowed">
 				<p>kujenga pamoja is an interactive experience to play with your friends. Open Google chrome in your smartphones and go to:</p>
-				<p class="align-center"><a href="{{ game_url }}" class="url">{{ game_url }}</a></p>
+				<p class="align-center"><a class="url" href="{{ game_url }}">{{ game_url }}</a></p>
 				<p>when you are done just click play</p>
 				<a class="btnPlay box-shadowed">PLAY</a>
 			</div>
@@ -93,10 +93,13 @@
 				<li class="yellow box-shadowed">Player Connected<div class="tick"></div></li>
 			</ul>
 			
-			<div id="footer"><a href="#">&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS&nbsp;&nbsp;CREDITS</a></div>
+			<div id="footer">
+				<p class="creditsInfo">Kujenga Pamoja is an HTML5 game made by <a href="http://mindcookin.com/" target="_blank" class="me">Santiago Bernabe</a> with <a href="http://threejs.org/" target="_blank">THREE.js</a> and <a href="http://chandlerprall.github.io/Physijs/" target="_blank">Physijs.js</a> for 3D, <a href="https://developers.google.com/appengine/" target="_blank">Google App Engine Channel</a> for multiplayer communications, and <a href="http://jquery.com" target="_blank">Jquery</a> and <a href="http://www.greensock.com/tag/javascript/" target="_blank">TweenMax</a> for making my life easier. You can get the code on <a href="https://github.com/MindCookin/KujengaPamoja/" target="_blank">GitHub</a>. This work is under <a href="http://creativecommons.org/licenses/by/3.0/" target="_blank">Creative Commons Attribution 3.0 Unported License</a></p>
+			</div>
 		
 			<script type="text/javascript">
 				
+				connections.game_url	= '{{ game_url }}';
 				connections.game_key 	= '{{ game_key }}';
 				connections.me			= '{{ me }}';
 					

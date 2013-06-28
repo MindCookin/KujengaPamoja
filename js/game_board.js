@@ -111,10 +111,10 @@ GameBoardClass = Class.extend({
 			var vector = new THREE.Vector3;
 			switch( direction )
 			{
-				case 0 : vector.z = -gameScene.CUBE_DIMENSIONS.w + 3; break;	// up
-				case 1 : vector.x = -gameScene.CUBE_DIMENSIONS.w + 3; break;	// left
-				case 2 : vector.z = gameScene.CUBE_DIMENSIONS.w + 3; break;	// down
-				case 3 : vector.x = gameScene.CUBE_DIMENSIONS.w + 3; break;	// right
+				case 0 : vector.z = -gameScene.CUBE_DIMENSIONS.w -1; break;	// up
+				case 1 : vector.x = -gameScene.CUBE_DIMENSIONS.w - 1; break;	// left
+				case 2 : vector.z = gameScene.CUBE_DIMENSIONS.w + 1; break;	// down
+				case 3 : vector.x = gameScene.CUBE_DIMENSIONS.w + 1; break;	// right
 			}
 			
 			gameScene.place( vector );
@@ -315,7 +315,11 @@ GameBoardClass = Class.extend({
 		gameScene.actualObject.__dirtyPosition = true;
 		gameScene.actualObject.__dirtyRotation = true;
 		
+		gameScene.renderer.sortObjects = true;
+		
 		connections.sendMessage('/moveOK');
+		
+		sndManager.playSoundInstance( '/sounds/lift.mp3', false );
 	}
 })
 

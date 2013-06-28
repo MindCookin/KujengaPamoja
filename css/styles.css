@@ -30,7 +30,7 @@ h1 { margin : 19px auto; text-align: center; font: 70px 'CommandoCommando', Aria
 #camera_controls_info { position : absolute; padding : 2px 15px; bottom : -30px; right : 0px; background-color:rgba(0,0,0,0.5); font: 11px Courier, Arial, Helvetica, sans-serif; color: #DDDDDD; text-shadow: 1px 1px #111111; margin : 0; }
 	
 #playersSidebar { position : absolute; top : 20%; left : 0px; list-style : none; margin : 0; padding : 0; z-index : 200; }
-	#playersSidebar li { position : relative; display:block; margin-bottom: 20px; padding: 10px 45px 10px 10px; width: 165px; font: 30px/32px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; color: white;   background: url('../images/mobile-icon.png') 165px center no-repeat; margin-left : -200px; }
+	#playersSidebar li { position : relative; display:block; margin-bottom: 20px; padding: 20px 45px 20px 10px; width: 165px; font: 0px/32px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; color: white;   background: url('../images/mobile-icon.png') 165px center no-repeat; margin-left : -200px; }
 	#playersSidebar li.active{  margin-left : 0; } 
 	#playersSidebar li.red{ background-color:#a91515; }
 	#playersSidebar li.green{ background-color:#3ba915; }
@@ -38,9 +38,14 @@ h1 { margin : 19px auto; text-align: center; font: 70px 'CommandoCommando', Aria
 	#playersSidebar li.yellow{ background-color:#e7ac04; }
 	#playersSidebar .tick{ visibility : hidden; background: url('../images/tick.png') center center no-repeat; position: absolute;bottom: 5px; right: -6px; width: 24px; height: 22px;	}
 
-#footer { position : fixed; bottom: 0; left : 0; overflow : hidden; padding:0; margin : 0; width:100%;}
-	#footer a { display:block; background: black; color: white; font: 20px/32px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; padding : 5px; text-align:center; margin : 0; text-decoration : none;}
-	#footer a:hover {background: white; color: black;}
+#footer { position : fixed; bottom: 0; left : 0; padding:0; margin : 0; width : 100%; z-index : 300;}
+	#footer p.credits{ display:block; background: black; color: white; font: 20px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; padding : 10px 5px; text-align:center; margin : 0; text-decoration : none;}
+/*	#footer p:hover {background: white; color: black;} */ 
+	#footer p.creditsInfo { background: black; color: #999999; font: 11px Courier, Arial, sans-serif;letter-spacing: 0; padding : 10px; text-align:justify; margin : 0; text-decoration : none;}
+	#footer a.me { color:#e7ac04; }
+	#footer a.me:hover { color:#e3db04; }
+	#footer a{ color:#AAAAAA; }
+	#footer a:hover{ color:#BBBBBB; }
 
 .popup { margin : 0px; padding : 0px 20px 30px; color:white; font: 20px/25px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; position : absolute; top: 25%; left : 25%; z-index : 110; background: #a91515 url('../images/bgPixelLine.png') bottom left repeat-x; width:50%; }	
 	.popup p{}
