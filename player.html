@@ -23,7 +23,6 @@
 		<script type="text/javascript" src='/_ah/channel/jsapi'></script>
 		
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-		<script type="text/javascript" src="js/libs/modernizr.js"></script>
 		<script type="text/javascript" src='/js/libs/greensock/TweenMax.min.js'></script>
 		
 		<script type="text/javascript" src="js/core.js"></script>
@@ -55,6 +54,7 @@
 				<a id="btnLeft" class="btnArrow"><div class="arrow"></div>LEFT</a>
 				<a id="btnRight" class="btnArrow"><div class="arrow"></div>RIGHT</a>
 				<a id="btnOK" class="btnCenter"><div class="arrow"></div>OK</a>
+				<a id="btnAccurate" class="btnAccurate">Accurate</a>
 			</div>
 		</div>
 	
@@ -65,7 +65,9 @@
 		
 		$( function(){
 			player.start();
-			TweenMax.delayedCall( .1, connections.initialize, [ '{{ token }}' ] );
+			
+			connections.token = '{{ token }}';
+			setTimeout( connections.initialize, 100 );
 		});
 	</script>
 	</body>

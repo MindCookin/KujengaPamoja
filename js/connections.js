@@ -1,9 +1,10 @@
 ConnectionClass = EventBusClass.extend({
 
+	token		: null,
 	game_url 	: null,
 	game_key 	: null,
 	me 			: null,
-	data 		: {},
+	data 		: { users : [] },
 	socket		: null,
 	channel		: null,
 				
@@ -47,15 +48,16 @@ ConnectionClass = EventBusClass.extend({
 			}
 			else	
 			{
-				connections.data.user1 	= newState.user1;
-				connections.data.user2 	= newState.user2;
-				connections.data.user3 	= newState.user3;
-				connections.data.user4 	= newState.user4;
-				connections.data.machine= newState.machine;
-				connections.data.active = newState.active;
-				connections.data.press  = newState.press;
-				connections.data.loose  = newState.loose;
-				connections.data.state  = newState.state;
+				connections.data.users[0] 	= newState.user1;
+				connections.data.users[1] 	= newState.user2;
+				connections.data.users[2] 	= newState.user3;
+				connections.data.users[3] 	= newState.user4;
+				connections.data.machine	= newState.machine;
+				connections.data.active 	= newState.active;
+				connections.data.press  	= newState.press;
+				connections.data.accuracy	= newState.accuracy;
+				connections.data.lose  		= newState.lose;
+				connections.data.state  	= newState.state;
 				
 				console.log( "STATE : " + newState.state );
 				
@@ -65,11 +67,11 @@ ConnectionClass = EventBusClass.extend({
 	},
 				  
 	onError : function(e){
-		alert( "Error: " + JSON.parse(e.data) );			
+//		alert( "Error: " + JSON.parse(e.data) );			
 	},
 		  
 	onClose : function(e){
-		alert( "Close: " + JSON.parse(e.data) );
+//		alert( "Close: " + JSON.parse(e.data) );
 	},
 		  
 	openChannel : function( token ) {
@@ -90,14 +92,14 @@ ConnectionClass = EventBusClass.extend({
 		connections.socket.onclose	= connections.onClose;
 	},
 		  
-	initialize : function( token ) {
+	initialize : function() {
 		
 		window.onbeforeunload = function () {
 			connections.sendMessage('/closed');
-//			window.onbeforeunload = undefined;
+			connections.socket.close();
 		};
 		
-		connections.openChannel( token );
+		connections.openChannel( connections.token );
 	}   
 });  
 

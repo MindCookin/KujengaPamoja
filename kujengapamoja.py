@@ -24,6 +24,7 @@ class Game(db.Model):
 	user4 	= db.StringProperty()
 	active  = db.StringProperty()
 	press  	= db.IntegerProperty()
+	accuracy= db.BooleanProperty()
 	loose  	= db.BooleanProperty()
 	state  	= db.IntegerProperty()
 
@@ -42,6 +43,7 @@ class GameUpdater():
 			"user4" 	: '' if not self.game.user4 else self.game.user4,
 			"active" 	: self.game.active,
 			"press"  	: self.game.press,
+			"accuracy"  : self.game.accuracy,
 			"loose"  	: self.game.loose,
 			"state"  	: self.game.state
 		}
@@ -82,10 +84,11 @@ class Pressed(webapp2.RequestHandler):
 		game = GameFromRequest(self.request).get_game()
 		user = self.request.get('u')
 
-		if game and user:
+		if game and user and user == game.active and game.state >= 3 and game.state < 6:
 			keyPressed = int( self.request.get('press') )
 			if keyPressed < 4 :
-				game.press = keyPressed
+				game.press 		= keyPressed
+				game.accuracy 	= bool( self.request.get('accuracy') == "true" )
 				game.put()
 				GameUpdater(game).send_update()
 			else :
@@ -103,18 +106,6 @@ class MoveOK(webapp2.RequestHandler):
 		if game and user:
 			game.state += 1
 			game.press = -1
-			game.put()
-			GameUpdater(game).send_update()
-
-				
-class Released(webapp2.RequestHandler):
-
-	def post(self):
-		game = GameFromRequest(self.request).get_game()
-		user = self.request.get('u')
-
-		if game and user:
-			game.press = -1;
 			game.put()
 			GameUpdater(game).send_update()
 	
@@ -169,7 +160,7 @@ class Activated(webapp2.RequestHandler):
 		game.put()
 		GameUpdater(game).send_update()
 
-class Loose(webapp2.RequestHandler):
+class Lose(webapp2.RequestHandler):
 
 	def post(self):
 		game = GameFromRequest(self.request).get_game()
@@ -270,8 +261,7 @@ application = webapp2.WSGIApplication([
     ('/closed', Closed),
     ('/startGame', StartGame),
     ('/pressed', Pressed),
-    ('/released', Released),
     ('/activated', Activated),
-    ('/loose', Loose),
+    ('/lose', Lose),
     ('/moveOK', MoveOK)
 ], debug=True)

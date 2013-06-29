@@ -1,93 +1,105 @@
 MachineClass = Class.extend({
 
-	playerData : [ 	{ name:'Red Player',className:'red',color:COLOR_RED }, 
-					{ name:'Green Player',className:'green',color:COLOR_GREEN },
-					{ name:'Blue Player',className:'blue',color:COLOR_BLUE },
-					{ name:'Yellow Player',className:'yellow',color:COLOR_YELLOW } ],
+	playerData : [ 	{ name:'Red Player',	className:'red',	color:COLOR_RED }, 
+					{ name:'Green Player',	className:'green',	color:COLOR_GREEN },
+					{ name:'Blue Player',	className:'blue',	color:COLOR_BLUE },
+					{ name:'Yellow Player',	className:'yellow',	color:COLOR_YELLOW } ],
+					
+	stateScreenDict 	: [],
+	stateSoundDict 		: [],
+	stateGameplayDict 	: [],
 
 	start : function(){
 		
-		machine.shortenURL();
+		// state dictionaries
+		machine.stateSoundDict[PLAY_STARTGAME]	= { sound : '/sounds/win.mp3', loop : false, volume : .5 };
+		machine.stateSoundDict[PLAY_SELECT] 	= { sound : '/sounds/pop.mp3', loop : false, volume : .4 };
+		machine.stateSoundDict[PLAY_PLACE] 		= { sound : '/sounds/pop.mp3', loop : false, volume : .4 };
+		machine.stateSoundDict[PLAY_MOVE] 		= { sound : '/sounds/blip.mp3', loop : false, volume : .5 };
+		machine.stateSoundDict[CHECK_PLACE] 	= { sound : '/sounds/blip.mp3', loop : false, volume : .5 };
+		machine.stateSoundDict[LOSE] 			= { sound : '/sounds/lifelost.mp3', loop : false, volume : .5 };
 		
+		machine.stateScreenDict[READY]				= machine.onReady;
+		machine.stateScreenDict[PLAY_STARTGAME] 	= machine.onStartGame;
+		machine.stateScreenDict[PLAY_MOVE]			= machine.onMove;
+		machine.stateScreenDict[PLAY_PLACE]			= machine.onPlace;
+		machine.stateScreenDict[CHECK_PLACE]		= machine.onCheckPlace;
+		machine.stateScreenDict[LOSE]				= machine.onLose;
+		
+		machine.stateGameplayDict[PLAY_STARTGAME]	= gamePlay.startGame;
+		machine.stateGameplayDict[PLAY_SELECT]		= gamePlay.handleSelection;
+		machine.stateGameplayDict[PLAY_MOVE]		= gamePlay.handleMove;
+		machine.stateGameplayDict[PLAY_PLACE]		= gamePlay.handlePlace;	
+		
+		// Listeners
 		$('.btnSound').click( machine.clickSound );
 		$('.btnTransparency').click( machine.clickTransparency );
 		$('.btnResetView').click( machine.clickView );
 		$('.btnPlay').click( machine.clickPlay );
 		$('.btnStats').click( machine.clickStats );
+		$('#game_wrapper').mouseenter( machine.showGameInfo );
+		$('#game_wrapper').mouseleave( machine.hideGameInfo );
+		$('.btnMinify').click( machine.clickMinify );
 		
-		$('#game_wrapper').mouseenter( machine.showGameInfo )
-		$('#game_wrapper').mouseleave( machine.hideGameInfo )
+		connections.addEventListener("onMessage", 	machine.onMessageHandler );
+		connections.addEventListener("onClose", 	machine.onCloseHandler );
 		
-		connections.addEventListener("onMessage", machine.onMessageHandler );
-		connections.addEventListener("onClose", machine.onCloseHandler );
+		// call methods
+		gamePlay.start();
+		gamePlay.animate();
 		
 		sndManager.create();
 		sndManager.playSoundInstance( '/sounds/background.mp3', true );
+		
+		machine.shortenURL();
+		
+		TweenMax.set( '.btnTransparency', { alpha : .5 } );
 	},
 	
 	onCloseHandler : function(){
 		
 		if ( connections.data.closed )
-		{
-			var selector;
-			switch( connections.data.closed )
-			{
-				case connections.data.user1 : selector = "#playersSidebar .red";	break;
-				case connections.data.user2 : selector = "#playersSidebar .green";	break;
-				case connections.data.user3 : selector = "#playersSidebar .blue";	break;
-				case connections.data.user4 : selector = "#playersSidebar .yellow";	break;
-			}
-			
-			$( selector ).removeClass( 'active' );
-			TweenMax.to( selector, .5, {marginLeft:-150} ); 
-		}
+			machine.checkUserState();
 	},
 
 	onMessageHandler : function() {
 		
+		machine.setGameplay();
 		machine.setScreen();
 		machine.playSound();
-		
-		if ( connections.data.state == PLAY_SELECT )
-			gameBoard.handleSelection( connections.data.press );
-		else if ( connections.data.state == PLAY_MOVE )
-			gameBoard.handleMove( connections.data.press );
-		else if ( connections.data.state == PLAY_PLACE )
-			gameBoard.handlePlace( connections.data.press );	
+		machine.checkUserState();
 	},
 	
 	playSound : function(){
 		
-		if ( connections.data.state == PLAY_STARTGAME )
-			sndManager.playSoundInstance( '/sounds/win.mp3', false );
-		
-		if ( ( connections.data.state == PLAY_SELECT || connections.data.state == PLAY_PLACE ) && connections.data.press >= 0 )	
-			sndManager.playSoundInstance( '/sounds/pop.mp3', false, .4 );
+		var data = machine.stateSoundDict[ connections.data.state ];
 			
-		if ( ( connections.data.state == PLAY_MOVE || connections.data.state == CHECK_PLACE )  && connections.data.press == -1 )	
-			sndManager.playSoundInstance( '/sounds/blip.mp3', false );
-			
-		if ( connections.data.state == LOOSE )
-			sndManager.playSoundInstance( '/sounds/lifelost.mp3', false );
+		if( data )
+		{
+			if ( 
+				( data.sound == '/sounds/blip.mp3'&& connections.data.press > 0 ) || 
+				( data.sound == '/sounds/pop.mp3' && connections.data.press < 0 )  
+			)
+				return;
+			else
+				sndManager.playSoundInstance( data.sound, data.loop, data.volume );
+		}
 	},
 	
 	setScreen : function(){
+		
+		if( machine.stateScreenDict[ connections.data.state ] )
+			machine.stateScreenDict[ connections.data.state ]();
+	},
 	
-		/** set active player **/
-		if ( connections.data.user1 && !$("#playersSidebar .red").hasClass("active") )
-			machine.activate( "#playersSidebar .red" )
-			
-		if ( connections.data.user2 && !$("#playersSidebar .green").hasClass("active") )
-			machine.activate( "#playersSidebar .green" )
-			
-		if ( connections.data.user3 && !$("#playersSidebar .blue").hasClass("active") )
-			machine.activate( "#playersSidebar .blue" )
-			
-		if ( connections.data.user4 && !$("#playersSidebar .yellow").hasClass("active") )
-			machine.activate( "#playersSidebar .yellow" )
-			
-		/** set play button **/
-		if ( connections.data.state == READY && $('.btnPlay').css('display') == "none" )
+	setGameplay : function(){
+		
+		if( machine.stateGameplayDict[ connections.data.state ] )
+			machine.stateGameplayDict[ connections.data.state ]();
+	},
+	
+	onReady : function(){
+		if ( $('.btnPlay').css('display') == "none" )
 		{
 			TweenMax.set( '#initial_screen .btnPlay', {alpha:0, scaleY : 0, display:"block"} );
 			TweenMax.to( '#initial_screen .btnPlay', .5, {alpha:1, scaleY : 1, autoAlpha : true } );
@@ -95,85 +107,77 @@ MachineClass = Class.extend({
 			TweenMax.set( '#initial_screen .startFun', {alpha:0, display:"block"} );
 			TweenMax.to( '#initial_screen .startFun', .5, {alpha:1, autoAlpha : true } );
 		}
+	},
+	
+	onLose : function(){
 		
-		if( connections.data.state == LOOSE )
-		{
-			TweenMax.set( '#stats_screen .btnPlay', { alpha:0, scaleY : 0, display:"block"} );
-			TweenMax.to( '#stats_screen .btnPlay', .5, { alpha:1, scaleY : 1, autoAlpha : true, delay : .5 } );
-			
-			TweenMax.to( '#info_screen', .5, {scaleX:0,scaleY:0 } );
-			
-			TweenMax.set( '#stats_screen', {scaleX:0,scaleY:0} );
-			TweenMax.to( '#stats_screen', .5, {scaleX:1,scaleY:1, autoAlpha : true } );
-			
-			var mText = FINAL_SENTENCES[ Math.floor( Math.random() * FINAL_SENTENCES.length ) ];
-			mText = mText.replace("[ACTIVE]", machine.getActiveUserData().name );
-			mText = mText.replace("[FLOOR]", gameScene.objects.length );
-			$('#stats_screen .sentence').html( mText );
-		}
+		TweenMax.to( '#info_screen', .5, {scaleX:0,scaleY:0 } );
 		
-		if ( connections.data.state == PLAY_STARTGAME )
-		{
-			$('#info_screen p').text( MACHINE_PLAYERSELECT.replace("[ACTIVE]", machine.getActiveUserData().name ) );
+		TweenMax.set( '#stats_screen', {scaleX:0,scaleY:0} );
+		TweenMax.to( '#stats_screen', .5, {scaleX:1,scaleY:1, autoAlpha : true } );
+		
+		var mText = FINAL_SENTENCES[ Math.floor( Math.random() * FINAL_SENTENCES.length ) ];
+		mText = mText.replace("[ACTIVE]", machine.getActiveUserData().name );
+		mText = mText.replace("[FLOOR]", gameScene.blocksGrid.length );
+		
+		$('#stats_screen .sentence').html( mText );
+		
+		machine.hideGameInfo();
+	},
+	
+	onMove : function(){
+		$('#info_screen p').text( MACHINE_PLAYERMOVE );
+	},
+	
+	onPlace : function(){
+		$('#info_screen p').text( MACHINE_PLAYERPLACE );
+	},
+	
+	onCheckPlace : function(){
+		$('#info_screen p').text( MACHINE_CHECKPLACE );
+	},
+	
+	onStartGame : function(){
+	
+		$('#info_screen p').text( MACHINE_PLAYERSELECT.replace("[ACTIVE]", machine.getActiveUserData().name ) );
 			
-			TweenMax.to( '#initial_screen', .5, {scaleX:0,scaleY:0,ease:"Quint.easeIn"} );
-			TweenMax.to( '#stats_screen', .5, {scaleX:0,scaleY:0,ease:"Quint.easeIn"} );
-			
-			TweenMax.set( '#info_screen', { scaleX:0, scaleY:0 } );
-			TweenMax.to( '#info_screen', .5, { scaleX:1, scaleY:1, ease:"Quint.easeOut", autoAlpha : true} );	
+		TweenMax.to( '#initial_screen', .5, {scaleX:0,scaleY:0,ease:"Quint.easeIn"} );
+		TweenMax.to( '#stats_screen', .5, {scaleX:0,scaleY:0,ease:"Quint.easeIn"} );
+		
+		TweenMax.set( '#info_screen', { scaleX:0, scaleY:0 } );
+		TweenMax.to( '#info_screen', .5, { scaleX:1, scaleY:1, ease:"Quint.easeOut", autoAlpha : true} );	
 
-			$('#info_screen').removeClass( 'red green blue yellow');
-			
-			$('#info_screen').addClass( machine.getActiveUserData().className );
-			
-			
-			$('#playersSidebar li').each( function(){
-				if( $(this).hasClass( machine.getActiveUserData().className ) )
-					$(this).text( PLAYER_TURN.replace("[ACTIVE]", machine.getActiveUserData().name ) )
-				else
-					$(this).text( PLAYER_WAIT );
-			});
-			
-			machine.showBackground();
-		}
+		$('#info_screen').removeClass( 'red green blue yellow');
+		$('#info_screen').addClass( machine.getActiveUserData().className );
+				
+		$('#playersSidebar li').each( function()
+		{
+			if( $(this).hasClass( machine.getActiveUserData().className ) )
+				$(this).text( PLAYER_TURN.replace("[ACTIVE]", machine.getActiveUserData().name ) )
+			else
+				$(this).text( PLAYER_WAIT );
+		});
 		
-		if ( connections.data.state == PLAY_MOVE )
-			$('#info_screen p').text( MACHINE_PLAYERMOVE );
-			
-		if ( connections.data.state == PLAY_PLACE )
-			$('#info_screen p').text( MACHINE_PLAYERPLACE );
-			
-		if ( connections.data.state == CHECK_PLACE )	
-			$('#info_screen p').text( MACHINE_CHECKPLACE );
-		
-
-		if( connections.data.state < PLAY_STARTGAME || connections.data.state > CHECK_PLACE )
-			machine.hideGameInfo();
+		machine.showBackground();
 	},
 	
 	getActiveUserData : function(){
 		
 		switch( connections.data.active )
 		{
-			case connections.data.user1 : return machine.playerData[0]; break;
-			case connections.data.user2 : return machine.playerData[1]; break;
-			case connections.data.user3 : return machine.playerData[2]; break;
-			case connections.data.user4 : return machine.playerData[3]; break;
+			case connections.data.users[0] : return machine.playerData[0]; break;
+			case connections.data.users[1] : return machine.playerData[1]; break;
+			case connections.data.users[2] : return machine.playerData[2]; break;
+			case connections.data.users[3] : return machine.playerData[3]; break;
 		}
-	},
-	
-	addActiveClass : function( target ){
-		target.addClass( 'active' );
 	},
 	
 	clickPlay : function( event )
 	{
 		event.preventDefault();
 		
-		if ( connections.data.state == LOOSE )
-			gameBoard.reset();
-		else	
-			machine.showGameInfo();
+		if ( connections.data.state == LOSE )	gamePlay.reset();
+		else									machine.showGameInfo();
 		
 		connections.sendMessage('/startGame');
 	}, 
@@ -181,7 +185,7 @@ MachineClass = Class.extend({
 	clickSound : function( event )
 	{
 		event.preventDefault();
-		machine.toggleTransparency( $(this) );
+		machine.toggleToolsButton( $(this) );
 		
 		sndManager.toggleMute();
 	}, 
@@ -189,7 +193,7 @@ MachineClass = Class.extend({
 	clickStats  :function( event )
 	{
 		event.preventDefault();
-		machine.toggleTransparency( $(this) );
+		machine.toggleToolsButton( $(this) );
 		
 		gameScene.toggleStats();
 	},
@@ -197,7 +201,7 @@ MachineClass = Class.extend({
 	clickTransparency : function( event )
 	{
 		event.preventDefault();
-		machine.toggleTransparency( $(this) );
+		machine.toggleToolsButton( $(this) );
 		
 		if ( $(this).hasClass('transparent'))
 			gameScene.makeTransparent();
@@ -208,12 +212,11 @@ MachineClass = Class.extend({
 	clickView : function( event ){
 	
 		event.preventDefault();
-		
 		gameScene.resetView();
 		
 	},
 	
-	toggleTransparency : function( element ){
+	toggleToolsButton : function( element ){
 	
 		if ( element.hasClass('transparent'))
 		{
@@ -261,11 +264,32 @@ MachineClass = Class.extend({
 		
 	},
 	
-	activate : function(name){
+	checkUserState : function(){
+		
+		var i, max, className;
+		var users = connections.data.users;
+		
+		for ( i = 0, max = users.length; i < max; i++ )
+		{
+			className = machine.playerData[i].className;
+		
+			if ( connections.data.users[i] != "" && !$("#playersSidebar ." + className ).hasClass("active") )
+				machine.activateUser( "#playersSidebar ." + className )
+			else if ( connections.data.users[i] == "" )
+				machine.deactivateUser( "#playersSidebar ." + className )		
+		}
+	},
+	
+	activateUser : function(name){
 		$(name + ' .tick').css('visibility', 'visible');
-		TweenMax.to( name, .5, {marginLeft:-150, onComplete : machine.addActiveClass, onCompleteParams : [  $(name)] } );
+		TweenMax.to( name, .5, {marginLeft:-150, onComplete :  function(){ $(name).addClass( 'active' ); } } );
 		
 		sndManager.playSoundInstance( '/sounds/blip.mp3', false );
+	}, 
+	
+	deactivateUser : function(name){
+		$(name + ' .tick').css('visibility', 'hidden');
+		TweenMax.to( name, .5, {marginLeft:-200, onComplete :  function(){ $(name).removeClass( 'active' ); } } );
 	}, 
 	
 	shortenURL: function()
@@ -287,6 +311,17 @@ MachineClass = Class.extend({
 				$('#camera_controls_info span').text( connections.game_url );
 			}
 		});	
+	},
+	
+	clickMinify : function( event ){
+		event.preventDefault();
+		
+		$('#info_screen').toggleClass("minified");
+		
+		if ( $('#info_screen').hasClass("minified") )
+			$(this).text("+")
+		else
+			$(this).text("x")
 	}
 });
 

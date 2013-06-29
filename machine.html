@@ -23,7 +23,6 @@
 		<script type="text/javascript" src='/_ah/channel/jsapi'></script>
 		
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-		<script type="text/javascript" src="js/libs/modernizr.js"></script>
 		<script type="text/javascript" src="js/libs/three.min.js"></script>
 		<script type="text/javascript" src="js/libs/physi.js"></script>
 		<script type="text/javascript" src="js/libs/stats.min.js"></script>
@@ -34,8 +33,8 @@
 		<script type="text/javascript" src="js/utils/SoundManager.js"></script>
 		<script type="text/javascript" src="js/utils/EventBus.js"></script>
 		<script type="text/javascript" src="js/connections.js"></script>
-		<script type="text/javascript" src="js/game_scene.js"></script>
-		<script type="text/javascript" src="js/game_board.js"></script>
+		<script type="text/javascript" src="js/scene.js"></script>
+		<script type="text/javascript" src="js/gameplay.js"></script>
 		<script type="text/javascript" src="js/constants.js"></script>
 		<script type="text/javascript" src="js/machine.js"></script>
 
@@ -59,32 +58,34 @@
 				<ul id="toolbar">
 					<li><a class="btnStats" href="#" title="View Stats">View Stats</a></li>
 					<li><a class="btnResetView" href="#" title="Reset View">Reset View</a></li>
-					<li><a class="btnTransparency" href="#" title="Toggle Transparency">Toggle Transparency</a></li>
+					<li><a class="btnTransparency transparent" href="#" title="Toggle Transparency">Toggle Transparency</a></li>
 					<li><a class="btnSound" href="#" title="Toggle Sounds">Toggle Sounds</a></li>	
 				</ul>
 				
 				<!------------------------------------ CAMERA CONTROLS INFO -->
 				<p id="camera_controls_info">Your URL is <span>{{ game_url }}</span>. Click and drag with your mouse to move the camera. Use mouse wheel for zoom control.</p>
-			</div>
+				
 			
 			<!-------------------------------------- INITIAL SCREEN	-->
 			<div id="initial_screen" class="popup box-shadowed">
-				<p>	Kujenga Pamoja means "build together" in Suajili. It is an interactive experience to play with your friends, based on the famous game "Jenga". 
-					<br/><br/>Open the following URL in your smartphones <span class="white">(Enable WiFi connection if you can)</span>. If you don't have any you can open it in a new browser's tab:</p>
+				<p>	Kujenga Pamoja is an interactive experience to play with your friends, based on the famous game "Jenga". 
+					Open the following URL in your smartphones <span class="white">(Enable WiFi connection if you can)</span>. If you don't have any you can open it in a new browser's tab:</p>
 				<p class="align-center"><a class="url" href="{{ game_url }}">{{ game_url }}</a> <br/><span>(Please pay attention to letter case)</span></p>
 				<p class="startFun">Well done! When you are all connected, click Play and let the fun begin!</p>
 				<a class="btnPlay box-shadowed">PLAY</a>
 			</div>
 			<!-------------------------------------- STATS SCREEN -->
 			<div id="stats_screen" class="popup box-shadowed">
-				<h3 class="align-center">Oh no!</h3>
+				<h3 class="align-center">You have lost</h3>
 				<p class="sentence">[SENTENCE]</p>
 				<a class="btnPlay box-shadowed">PLAY AGAIN</a>
 			</div>
 			<!-------------------------------------- INFO SCREEN -->
 			<div id="info_screen" class="popup box-shadowed green">
+				<a class="btnMinify" href="#">x</a>
 				<p>info screen</p>
 			</div> 
+			</div>
 			
 			<ul id="playersSidebar">
 				<li class="red box-shadowed">Player Connected<div class="tick"></div></li>
@@ -94,22 +95,25 @@
 			</ul>
 			
 			<div id="footer">
-				<p class="creditsInfo">Kujenga Pamoja is an HTML5 game made by <a href="http://mindcookin.com/" target="_blank" class="me">Santiago Bernabe</a> with <a href="http://threejs.org/" target="_blank">THREE.js</a> and <a href="http://chandlerprall.github.io/Physijs/" target="_blank">Physijs.js</a> for 3D, <a href="https://developers.google.com/appengine/" target="_blank">Google App Engine Channel</a> for multiplayer communications, <a href="http://jquery.com" target="_blank">jQuery</a> and <a href="http://www.greensock.com/tag/javascript/" target="_blank">TweenMax</a> for making my life easier. You can get the code on <a href="https://github.com/MindCookin/KujengaPamoja/" target="_blank">GitHub</a>. This work is under <a href="http://creativecommons.org/licenses/by/3.0/" target="_blank">Creative Commons Attribution 3.0 Unported License</a></p>
+				<p class="creditsInfo">Kujenga Pamoja is an HTML5 and WebGL game by <a href="http://mindcookin.com/" target="_blank" class="me">Santiago Bernabe</a> with <a href="http://threejs.org/" target="_blank">THREE.js</a> and <a href="http://chandlerprall.github.io/Physijs/" target="_blank">Physijs.js</a> for 3D, <a href="https://developers.google.com/appengine/" target="_blank">Google App Engine Channel</a> for multiplayer communications, <a href="http://jquery.com" target="_blank">jQuery</a> and <a href="http://www.greensock.com/tag/javascript/" target="_blank">TweenMax</a> for making my life easier. You can get the code on <a href="https://github.com/MindCookin/KujengaPamoja/" target="_blank">GitHub</a>. This work is under <a href="http://creativecommons.org/licenses/by/3.0/" target="_blank">Creative Commons Attribution 3.0 Unported License</a></p>
 			</div>
 		
 			<script type="text/javascript">
 				
+				// imports
+				Physijs.scripts.worker 	= 'js/libs/physijs_worker.js';
+				Physijs.scripts.ammo 	= 'ammo.js';
+		
 				connections.game_url	= '{{ game_url }}';
 				connections.game_key 	= '{{ game_key }}';
 				connections.me			= '{{ me }}';
 					
 				$( function(){
-					gameBoard.start();
-					gameBoard.animate();
 
 					machine.start();
-				
-					TweenMax.delayedCall( .1, connections.initialize, [ '{{ token }}' ] );
+					
+					connections.token = '{{ token }}';
+					setTimeout( connections.initialize, 100 );
 				});
 			</script>
 			
