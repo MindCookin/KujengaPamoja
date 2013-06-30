@@ -12,9 +12,13 @@ body.machine.green, #game_background.green { background: url('../images/backgrou
 body.machine.blue, #game_background.blue { background: url('../images/background-blue.png'); }
 body.machine.yellow, #game_background.yellow { background: url('../images/background-yellow.png'); }
 
-#game_background{ position : absolute; width : 100%; height : 100%; top:0; left:0; }
-#global_wrapper{ position : relative; }
+#game_background{ position : absolute; width : 100%; height : 100%; top:0; left:0;}
+#global_wrapper{ position : relative; z-index : 10;}
 
+#loader { background : #FFFFFF; position : absolute; z-index : 12; padding : 10px; text-align : center; display: inline-block; margin : 0; visibility : hidden; }
+	#loader #loader_text { color: black; font: 20px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; margin : 0px;  width : auto;}
+	#loader #loader_bars { font: 40px Arial, sans-serif; }
+	
 h1 { margin : 19px auto; text-align: center; font: 70px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; color: white; text-shadow: 10px 10px #000000; }
 
 #game_wrapper { position:relative; background:#000000; 	width:85%; height: 70%; margin: 15px auto 0; position:relative; overflow : hidden }
