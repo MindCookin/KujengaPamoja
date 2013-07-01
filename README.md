@@ -35,26 +35,28 @@ The incredible [THREE.js](http://threejs.org/) for WebGL and 3D.
 
 [Google App Engine Channel](https://developers.google.com/appengine/docs/python/channel/) for socket communications.
 
-[TweenMax](http://www.greensock.com/tag/javascript/)
+[TweenMax](http://www.greensock.com/tag/javascript/) for tweening and animations.
 
-[jQuery](http://jquery.com/)
+[jQuery](http://jquery.com/) for DOM selections.
 
 [Closure compiler](https://developers.google.com/closure/compiler/) to compress the code. Really useful.
 
 Hosted on [Google App Engine](https://developers.google.com/appengine/)
 
 ### Fonts :
-[Commando](http://www.fontsquirrel.com/fonts/Commando)[CC BY-SA 3.0](http://creativecommons.org/licenses/by-nc-sa/3.0/).
+[Commando](http://www.fontsquirrel.com/fonts/Commando) Licensed by [CC BY-SA 3.0](http://creativecommons.org/licenses/by-nc-sa/3.0/).
 
 ### Music and sounds :
-[Lift](http://www.flashkit.com/soundfx/Interfaces/Blips/Lift_Me_-Vyachesl-8596/index.php)[CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
+[Lift](http://www.flashkit.com/soundfx/Interfaces/Blips/Lift_Me_-Vyachesl-8596/index.php) Licensed by [CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
 
-[Click](http://www.flashkit.com/soundfx/Interfaces/Clink-Intermed-476/index.php)[CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
+[Click](http://www.flashkit.com/soundfx/Interfaces/Clink-Intermed-476/index.php) Licensed by [CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
 
-[Fairyland](http://www.freesound.org/people/AlienXXX/sounds/82328/)[CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
+[Fairyland](http://www.freesound.org/people/AlienXXX/sounds/82328/) Licensed by [CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
 
-[Life Lost](http://www.freesound.org/people/noirenex/sounds/159408/)[CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
+[Life Lost](http://www.freesound.org/people/noirenex/sounds/159408/) Licensed by [CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
 
-[8bit Coin](http://www.freesound.org/people/timgormly/sounds/170147/)[CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
+[8bit Coin](http://www.freesound.org/people/timgormly/sounds/170147/) Licensed by [CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
 
-[Coinup](http://www.freesound.org/people/mattwasser/sounds/58919/)[CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
+[Coinup](http://www.freesound.org/people/mattwasser/sounds/58919/) Licensed by [CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
+
+#### This game is licensed by [CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
