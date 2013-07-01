@@ -60,3 +60,4 @@ Hosted on [Google App Engine](https://developers.google.com/appengine/)
 [Coinup](http://www.freesound.org/people/mattwasser/sounds/58919/) Licensed by [CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
 
 #### This game is licensed by [CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
+#### Author: [Santiago Bernabe](http://mindcookin.com/)
