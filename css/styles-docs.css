@@ -1,0 +1,30 @@
+/*********************************************************************************************/ 
+/******** Commando Font from fontsquirrel ( www.fontsquirrel.com/fonts/Commando )	**********/
+/*********************************************************************************************/
+
+/******************************************************************/
+/****************			DOCS			***********************/
+/******************************************************************/
+html {  background: url('../images/background-red.png');  margin : 0; padding : 0  }
+body{ font : 14px/25px Arial, Helvetica, sans-serif; margin : 0; padding : 0 }
+
+#wrapper {  background : #FFFFFF; padding : 0px 0 20px; margin : 20px 10% 70px; }
+#content{ margin : 0 7%; padding-top : 10px; }
+
+h1 { padding : 30px 0 10px 0; margin : 0; text-align: center; font: 70px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; color: #000000; display : none; }
+h2 { margin : 30px auto; text-align: center; font: 30px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; color: black; }
+p, h2, h5 { }
+h2  span { font-size : 40px;}
+
+h5 { padding : 0; margin : 0; }
+h2 { padding: 10px 0; }
+
+a { text-decoration : none; font-weight : bold; color : #000000; }
+a:hover { color : #a91515; }
+
+/******************************************************************/
+/****************			GLOBAL			***********************/
+/******************************************************************/
+
+.box-shadowed {box-shadow: 7px 7px 0px #000000; }
+.align-center {text-align:center;}

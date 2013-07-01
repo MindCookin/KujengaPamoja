@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	
+		<title>Kujenga Pamoja Documentation</title>
+	
+		<meta charset="utf-8" />
+
+		<!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
+		Remove this if you use the .htaccess -->
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+		<link rel="icon" type="image/png" href="/images/favicon.ico" />
+
+		<meta name="description" content="" />
+		<meta name="author" content="Mind Cookin" />
+
+		<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+
+		<!-- STYLESHEETS -->
+		<link rel="stylesheet" href="/css/fonts.css" type="text/css" charset="utf-8"/>
+		<link rel="stylesheet" href="/css/styles-docs.css" type="text/css" charset="utf-8"/>
+
+	</head>
+
+	<body>
+		<div id="wrapper" class="box-shadowed">
+			<div id="content">
+				<h2>About <span>Kujenga Pamoja</span> game</h2>
+				<p>Kujenga Pamoja ( or "build together" in Suajili) is a multiplayer 3D game based on open client-browser communications and HTML5 3D context. The idea is to connect multiple players at the same time in the same screen and enjoy playing together!</p>
+
+				<h2>How to play</h2>
+				<p>Open <a href="http://kujenga-pamoja.appspot.com" target="_blank">kujenga-pamoja.appspot.com</a> in Chrome (at this time it is not avalaible in other browsers). You will be presented with an URL. Introduce the URL in your smartphone (this time you can use any browser) and follow the instructions. You should be able to play with the "machine" (desktop) from your mobile phone. You can connect up to four players at once.</p>
+				<h5>Note1: Enable Wifi connection in your smartphone. If you don't have a good bandwith, you will experiment strange behaviours.</h5>
+				<h5>Note2: If you don't have any smartphone, just open the given URL in a new tab. It is not so beatiful but is much more handy for testing.</h5>
+
+				<h2>Game design</h2>
+				<p>The objective of the game is to remove blocks from a given tower and add them at the top to build the highest tower possible. It is based on <a href="http://en.wikipedia.org/wiki/Jenga" target="_blank">"Jenga"</a> ( "built" in Suajili), but the difference is that in this case you will be able to do it online and with your smartphones. </p>
+				<p>Building a game based in blocks and giving each player a primary color (red, green, blue and yellow) gave design a pretty 8bit-like look.</p>
+
+				<h2>Technical process</h2>
+				<p>Working with 3D (in HTML5) and sockets was a challenge in itself for me. I didn't worked with these technologies before, but they look very attractive for me. When I saw what Google <a href="http://www.youtube.com/watch?v=KOCM9_qGccY" target="_blank">is doing</a> with them I thought "I want to do the same!".</p>
+				<p>I chose <a href="http://threejs.org" target="_blank">THREE.js</a> for 3D environment. It is written in javascript and is built over WebGL, making canvas 3D environment easy to use, and has good documentation too. There is also a very useful course on WEbGL and 3D in Udacity that helped me very much at the process and reminded me why 3D graphics development is allways so tricky.</p>
+				<p>I chose <a href="http://chandlerprall.github.io/Physijs/" target="_blank">Physijs</a> for physics, an abstraction layer for THREE over  <a href="https://github.com/kripken/ammo.js/" target="_blank">Ammo.js</a>. Was very helpful because I do not need to get much deeper in physics problems and let me focus on the bad part of development: the sockets.</p>
+				<p>On sockets, I first looked forward for websockets and <a href="http://nodejs.org" target="_blank">Nodejs</a>. My experience was good, and locally it worked perfect, but since I don't have a dedicated server it reveals imposible for me to install Node online. I found <a href="https://developers.google.com/appengine/" target="_blank">Google App Engine</a> and its <a href="https://developers.google.com/appengine/docs/python/channel/" target="_blank">Google App Engine Channel</a> where I could host my project free and be able to use a socket API. It was not pure HTML5 (at least I think so) but was very easy to use and let me touch a lot of things in the server. I chose a server built in Python, and really love the sintaxis, for me much clearer than PHP.</p>
+				<p>In the end I discovered <a href="https://developers.google.com/closure/compiler/" target="_blank">Closure Compiler</a>, a javascript compiler that generates minified code from a bucket of javascript files. It helped me improve performance and generates light-weight code.</p>
+				
+				<h2>Conclusion</h2>
+				<p>Working with sockets and 3D environment was really great, gave me some new ideas and revealed that this game have a lot of possibilities (I have some ideas for features to add in the future). I enjoyed very much developing 3D, I think is really a very deep world, and socket revealed to be much easy to use tan I expected. Python also surprised me. Now I want to port all my PHP projects to Python! </p>
+				<p>The bad part is that there are some bugs that depends on socket communication and WebGL implementation in different browsers and hardwares. Is the problem working with not so standar technologies.</p>
+				<p>The technical requeriments were so hard for me that they don't let me focus very much in deeper game design. Global design is good, with that 8-bit atmosphere, but I would like to improve game mechanics and design in the future.</p>
+				<p>Have fun! ^_^</p>
+				
+				<p>The game: <a href="http://kujenga-pamoja.appspot.com">Kujenga Pamoja</a><br/>
+				The code: <a href="https://github.com/MindCookin/KujengaPamoja">Git Hub</a><br/>
+				The author: <a href="http://mindcookin.com">Santiago Bernabe</a></p>
+			</div>
+		</div>
+	</body>
+</html>
