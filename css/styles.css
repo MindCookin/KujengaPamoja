@@ -35,6 +35,7 @@ h1 { margin : 19px auto; text-align: center; font: 70px 'CommandoCommando', Aria
 	
 #playersSidebar { position : absolute; top : 20%; left : 0px; list-style : none; margin : 0; padding : 0; z-index : 200; }
 	#playersSidebar li { position : relative; display:block; margin-bottom: 20px; padding: 20px 45px 20px 10px; width: 165px; font: 0px/32px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; color: white;   background: url('../images/mobile-icon.png') 165px center no-repeat; margin-left : -200px; }
+	#playersSidebar li.desktop { background: url('../images/desktop-icon.png') 165px center no-repeat;}
 	#playersSidebar li.active{  margin-left : 0; } 
 	#playersSidebar li.red{ background-color:#a91515; }
 	#playersSidebar li.green{ background-color:#3ba915; }
@@ -54,13 +55,16 @@ h1 { margin : 19px auto; text-align: center; font: 70px 'CommandoCommando', Aria
 
 .popup { margin : 0px; padding : 0px 20px 30px; color:white; font: 20px/25px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; position : absolute; top: 8%; left : 15%; z-index : 110; background: #a91515 url('../images/bgPixelLine.png') bottom left repeat-x; width:70%; text-shadow: 1px 1px #000000; }	
 	.popup p{}
-	.popup h3, .popup a.url{ color:#e7ac04; text-shadow: 3px 3px #000000;}
-	.popup a.url{ font-family:Arial, sans-serif; font-family: Verdana, sans-serif; font-weight: bold; letter-spacing: -1px; text-decoration: none; font-style: italic;}
-	.popup a.url:hover{ color:#e3db04;}
+	.popup h3, .popup .gameMode a { color:#e7ac04; text-shadow: 3px 3px #000000;}
+	.popup .gameMode a{ font-family:Arial, sans-serif; font-family: Verdana, sans-serif; font-weight: bold; letter-spacing: -1px; text-decoration: none; font-style: italic;}
+	.popup .gameMode a:hover{ color:#e3db04;}
 	.popup  a.btnPlay { display : none; padding: 20px; text-align:center; font-size : 50px; background:#3ba915; width: 180px; margin : 0px auto 10px; cursor:pointer; visibility : hidden }
 	.popup  a.btnPlay:hover { color:#3ba915; background : #FFFFFF; }
 	.popup span { font-size: 16px; color: #e7ac04; text-shadow: 1px 1px #000000;}
 	.popup span.white{ color: #ffffff;}
+	
+	.popup p.gameMode { width : 45%; float : left; }
+	.popup p.or { width : 10%; float : left; color : #FFFFFF; }
 	
 #initial_screen {}
 #stats_screen{ visibility : hidden; }
@@ -76,7 +80,27 @@ h1 { margin : 19px auto; text-align: center; font: 70px 'CommandoCommando', Aria
 	#info_screen .btnMinify { position: absolute; top: -1px; left: 6px; text-shadow: none; font: 13px Arial, Helvetica, sans-serif; color : #FFFFFF; text-decoration : none;}
 	#info_screen.minified .btnMinify { text-indent: 0px; font-weight : bold; }
 	
-.startFun { display : none; visibility : hidden; margin : 0; }
+.startFun { display : none; visibility : hidden; margin : 0; clear : both; }
+
+#desktopPlayerButtons { position: absolute;	top : 5px; left:10px; visibility : hidden  }
+	#desktopPlayerButtons a { background : #000000; box-shadow: 3px 3px 0px #555555; display: block; position : absolute; text-indent:-10000px; overflow:hidden; }
+	#desktopPlayerButtons a:active { background : #000000; box-shadow: 1px 1px 0px #555555; margin : 2px; }	
+
+#desktopPlayerButtons .btnArrow { height	: 20px; width : 20px; }
+	#desktopPlayerButtons #btnUp { top : 0px; left : 22px; }
+	#desktopPlayerButtons #btnUp .arrow { width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 5px solid #1561a9; position: absolute; bottom: 4px; right: 4px;}
+	#desktopPlayerButtons #btnLeft { top : 22px; left : 0px; }
+	#desktopPlayerButtons #btnLeft .arrow { width: 0; height: 0; border-bottom: 5px solid transparent; border-top: 5px solid transparent; border-right: 5px solid #3ba915; position: absolute; top: 4px; right: 4px;}
+	#desktopPlayerButtons #btnDown { top : 22px; left : 22px; }
+	#desktopPlayerButtons #btnDown .arrow { width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid #e7ac04; position: absolute; top: 4px; right: 4px;}
+	#desktopPlayerButtons #btnRight { top : 22px; left : 44px; }
+	#desktopPlayerButtons #btnRight .arrow { width: 0; height: 0; border-bottom: 5px solid transparent; border-top: 5px solid transparent; border-left: 5px solid #a91515; position: absolute; top: 4px; left: 4px;}	
+	
+#desktopPlayerButtons a#btnAccurate { width: 66px;top: 74px;left: 0;visibility: visible;text-indent: 0;color: white;overflow: auto;font: 10px/15px "Commando";visibility: hidden;background: #000000;text-align: center; }
+	#desktopPlayerButtons a#btnAccurate.selected {color: black; background : #FFFFFF; box-shadow: 3px 3px 0px #000000; } 
+
+#desktopPlayerButtons a.btnSpacebar { text-align : center; width : 66px; font: 14px/24px 'CommandoCommando', Arial, sans-serif;letter-spacing: 0; color: white; text-shadow: 2px 2px 0 #000; top : 46px; left : 0px; text-indent:0px; }
+
 	
 /******************************************************************/
 /****************			PLAYER			***********************/

@@ -60,6 +60,7 @@ MachineClass = Class.extend({
 		$('#game_wrapper').mouseenter( machine.showGameInfo );
 		$('#game_wrapper').mouseleave( machine.hideGameInfo );
 		$('.btnMinify').click( machine.clickMinify );
+		$('.desktopPlayer').click( machine.addDesktopPlayer );
 		
 		// connection listeners
 		connections.addEventListener("onMessage", 	machine.onMessageHandler );
@@ -78,6 +79,9 @@ MachineClass = Class.extend({
 		
 		// set transparency of transparency button
 		TweenMax.set( '.btnTransparency', { alpha : .5 } );
+		
+		// start desktop player mock
+		desktopPlayer.start();
 	},
 	
 	/**
@@ -97,6 +101,7 @@ MachineClass = Class.extend({
 	 */	
 	onMessageHandler : function() {
 		
+		desktopPlayer.onMessageHandler();
 		machine.setGameplay();
 		machine.setScreen();
 		machine.playSound();
@@ -192,7 +197,10 @@ MachineClass = Class.extend({
 	 */
 	onMove : function(){
 		// update info_screen text
-		$('#info_screen p').text( MACHINE_PLAYERMOVE );
+		if ( connections.data.active.isDesktop )
+			$('#info_screen p').text( MACHINE_PLAYERMOVE_DESKTOP );
+		else	
+			$('#info_screen p').text( MACHINE_PLAYERMOVE );
 	},
 	
 	/**
@@ -200,7 +208,10 @@ MachineClass = Class.extend({
 	 */
 	onPlace : function(){
 		// update info_screen text
-		$('#info_screen p').text( MACHINE_PLAYERPLACE );
+		if ( connections.data.active.isDesktop )
+			$('#info_screen p').text( MACHINE_PLAYERPLACE_DESKTOP );
+		else
+			$('#info_screen p').text( MACHINE_PLAYERPLACE );
 	},
 	
 	/**
@@ -215,9 +226,12 @@ MachineClass = Class.extend({
 	 * called when state is PLAY_STARTGAME
 	 */
 	onStartGame : function(){
-	
+		
 		// set our display to the active user's colors and texts
-		$('#info_screen p').text( MACHINE_PLAYERSELECT.replace("[ACTIVE]", machine.getActiveUserData().name ) );
+		if ( connections.data.active.isDesktop )
+			$('#info_screen p').text( MACHINE_PLAYERSELECT_DESKTOP.replace("[ACTIVE]", machine.getActiveUserData().name ) );
+		else
+			$('#info_screen p').text( MACHINE_PLAYERSELECT.replace("[ACTIVE]", machine.getActiveUserData().name ) );
 		
 		// hide intial screen or stats screen if they are visible
 		TweenMax.to( '#initial_screen', .5, {scaleX:0,scaleY:0,ease:"Quint.easeIn"} );
@@ -249,12 +263,12 @@ MachineClass = Class.extend({
 	 */
 	getActiveUserData : function(){
 		
-		switch( connections.data.active )
+		switch( connections.data.active.id )
 		{
-			case connections.data.users[0] : return machine.playerData[0]; break;
-			case connections.data.users[1] : return machine.playerData[1]; break;
-			case connections.data.users[2] : return machine.playerData[2]; break;
-			case connections.data.users[3] : return machine.playerData[3]; break;
+			case connections.data.users[0].id : return machine.playerData[0]; break;
+			case connections.data.users[1].id : return machine.playerData[1]; break;
+			case connections.data.users[2].id : return machine.playerData[2]; break;
+			case connections.data.users[3].id : return machine.playerData[3]; break;
 		}
 	},
 	
@@ -342,8 +356,8 @@ MachineClass = Class.extend({
 	
 		if( event )
 			event.preventDefault();
-		
-		if( connections.data.state >= PLAY_STARTGAME && connections.data.state <= CHECK_PLACE  )
+			
+		if( DEBUG_MODE || ( connections.data.state >= PLAY_STARTGAME && connections.data.state <= CHECK_PLACE ) )
 		{
 			TweenMax.to( '#toolbar', .3, { alpha : 1, autoAlpha : true } );
 			TweenMax.to( '#camera_controls_info', .3, { alpha : 1, autoAlpha : true } );
@@ -396,9 +410,12 @@ MachineClass = Class.extend({
 		{
 			className = machine.playerData[i].className;
 		
-			if ( connections.data.users[i] != "" && !$("#playersSidebar ." + className ).hasClass("active") )
+			if( connections.data.users[i].isDesktop )
+				$( "#playersSidebar ." + className ).addClass( 'desktop' );
+		
+			if ( connections.data.users[i].id != "" && !$("#playersSidebar ." + className ).hasClass("active") )
 				machine.activateUser( "#playersSidebar ." + className )
-			else if ( connections.data.users[i] == "" )
+			else if ( connections.data.users[i].id == "" )
 				machine.deactivateUser( "#playersSidebar ." + className )		
 		}
 	},
@@ -407,6 +424,7 @@ MachineClass = Class.extend({
 	 * notifies a player connection
 	 */
 	activateUser : function(name){
+	
 		$(name + ' .tick').css('visibility', 'visible');
 		TweenMax.to( name, .5, {marginLeft:-150, onComplete :  function(){ $(name).addClass( 'active' ); } } );
 		
@@ -457,6 +475,15 @@ MachineClass = Class.extend({
 			$(this).text("+")
 		else
 			$(this).text("x")
+	},
+	
+	/**
+	 * add desktop player
+	 */
+	addDesktopPlayer :function( event ){
+		event.preventDefault();
+		
+		connections.sendMessage('/addDesktopUser');
 	}
 });
 

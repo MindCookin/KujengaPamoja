@@ -5,6 +5,9 @@
  * 
  ************************************************/
 
+// Debug mode flag 
+var DEBUG_MODE = ( location.host.indexOf( "localhost" ) >= 0 );
+console.log( "DEBUG_MODE ------------> ", DEBUG_MODE );
 
 LoaderClass = Class.extend({	
 	
@@ -24,9 +27,10 @@ LoaderClass = Class.extend({
 		"/js/src/connections.js",
 		"/js/src/scene.js",
 		"/js/src/gameplay.js",
+		"/js/src/desktopPlayer.js",
 		"/js/src/machine.js"
 	],
-	texture_files 	: [ "/images/metal.jpg" ],
+	texture_files 	: [ "/images/metal.jpg", "/images/wood.jpg", "/images/plywood.jpg" ],
 	sound_files		: [ "/sounds/background.mp3" , "/sounds/blip.mp3", "/sounds/hit.mp3", "/sounds/lifelost.mp3", "/sounds/lift.mp3", "/sounds/pop.mp3", "/sounds/win.mp3" ],
 	
 	// the assets dictionary
@@ -81,8 +85,11 @@ LoaderClass = Class.extend({
 	loadSrc : function(){
 		
 		loader.textDOM.innerHTML = 'Loading Source';
-//		loader.loadAssets( loader.javascript_src_mini, loader.loadTextures );
-		loader.loadAssets( loader.javascript_src_debug, loader.loadTextures );
+		
+		if ( DEBUG_MODE )
+			loader.loadAssets( loader.javascript_src_debug, loader.loadTextures );
+		else
+			loader.loadAssets( loader.javascript_src_mini, loader.loadTextures );
 	},
 	
 	/**
@@ -148,7 +155,7 @@ LoaderClass = Class.extend({
 
 				if(assetType === 0) { // Asset is the texture
 					
-					var texture = THREE.ImageUtils.loadTexture( 'images/metal.jpg', null, function(){
+					var texture = THREE.ImageUtils.loadTexture( assetList[i], null, function(){
 						loader.onLoadedCallback(texture, loadBatch);
 					} );
 						

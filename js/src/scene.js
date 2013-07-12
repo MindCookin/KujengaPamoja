@@ -11,6 +11,7 @@ GameSceneClass = Class.extend({
 	// Dimensions references
 	CUBE_DIMENSIONS : { w : 25, h : 15, d : 75 },
 	VIEWPORT_DIMENSIONS : { w : 0, h : 0 },
+	GROUND_SIDE		: 400,
 
 	// objects from the scene
 	container	: null,
@@ -19,12 +20,19 @@ GameSceneClass = Class.extend({
 	scene		: null,
 	renderer	: null,
 	spotLight	: null,
-	fixedDirectionalLight : null,
+	directionalLight : null,
+	directionalLightContainer : null,
 	pointLight	: null,
 	stats		: null,
 	arrows 		: null,
 	ground 		: null,
-	texture : null,
+	metalTexture: null,
+	woodTexture	: null,
+	plywoodTexture: null,
+	baseObjectMaterial : null,
+	
+	// Dictionary to relate a color to a material, useful for block material
+	dictColorsMaterials : {},
 	
 	// actual block selection floor and line
 	actualSelection : { floor : 0, line : 0 },
@@ -58,7 +66,8 @@ GameSceneClass = Class.extend({
 		var block, color, blockGeom; 
 		var wall, wallGeom, wallParams;
 		var arrow, arrowGeom, arrowParams;
-		var fixedDirectionalLight, fixedDirectionalLight2, hemisphereLight;
+		var materials = [];
+		var hemisphereLight;
 		var i;
 		
 		// DOM ELEMENT CONTAINER
@@ -97,37 +106,51 @@ GameSceneClass = Class.extend({
 		
 		// LIGHTS
 		// global light
-		hemisphereLight = new THREE.HemisphereLight( 0xFFFFFF, COLOR_YELLOW, .6 );
+		hemisphereLight = new THREE.HemisphereLight( 0xFFFFFF, COLOR_YELLOW, .7 );
+		hemisphereLight.name = "hemisphereLight";
 		gameScene.scene.add( hemisphereLight );
 		
 		// directional light that cast a long shadow
-		fixedDirectionalLight = new THREE.DirectionalLight( 0xffffff, 1.5 );
-		fixedDirectionalLight.position.copy( gameScene.camera.position );
-		fixedDirectionalLight.position.setZ( 200 );
-		fixedDirectionalLight.castShadow = true;
-		fixedDirectionalLight.shadowCameraNear = 200;
-		fixedDirectionalLight.shadowCameraFar = gameScene.camera.far;
-		fixedDirectionalLight.shadowCameraFov = 50;
-		fixedDirectionalLight.shadowBias = -0.0000001;
-		fixedDirectionalLight.shadowDarkness = 0.3;
-		fixedDirectionalLight.shadowMapWidth = 2048;
-		fixedDirectionalLight.shadowMapHeight = 2048;
-		gameScene.scene.add( fixedDirectionalLight );
+		
+		gameScene.directionalLight = new THREE.DirectionalLight( 0xffffff, 1.5 );
+//		gameScene.directionalLight.position.copy( gameScene.camera.position );
+		gameScene.directionalLight.position = new THREE.Vector3( 200, 75, 200 );
+		gameScene.directionalLight.castShadow = true;
+		gameScene.directionalLight.shadowCameraNear = 200;
+		gameScene.directionalLight.shadowCameraFar = gameScene.camera.far;
+		gameScene.directionalLight.shadowCameraFov = 50;
+		gameScene.directionalLight.shadowBias = -0.00000001;
+		gameScene.directionalLight.shadowDarkness = 0.3;
+		gameScene.directionalLight.shadowMapWidth = 2048;
+		gameScene.directionalLight.shadowMapHeight = 2048;
+		
+		gameScene.directionalLightContainer = new THREE.Object3D();
+		
+		gameScene.directionalLightContainer.add( gameScene.directionalLight );
+		gameScene.scene.add( gameScene.directionalLightContainer );
 		
 		// spotlight attached to the camera
 		gameScene.spotLight = new THREE.SpotLight( 0xddddff, 1.2 );
 		gameScene.scene.add( gameScene.spotLight );
 		
 		// TEXTURE
-		// load texture from our cachedAssets
-    	gameScene.texture = loader.cachedAssets[ '/images/metal.jpg' ];
-		gameScene.texture.wrapS = gameScene.texture.wrapT = THREE.RepeatWrapping;
-		gameScene.texture.repeat.set( 1, .5 );
+		// load metalTexture from our cachedAssets
+    	gameScene.metalTexture = loader.cachedAssets[ '/images/metal.jpg' ];
+		gameScene.metalTexture.wrapS = gameScene.metalTexture.wrapT = THREE.RepeatWrapping;
+		gameScene.metalTexture.repeat.set( 1, .5 );
+		
+    	gameScene.woodTexture = loader.cachedAssets[ '/images/wood.jpg' ];
+		gameScene.woodTexture.wrapS = gameScene.woodTexture.wrapT = THREE.RepeatWrapping;
+		gameScene.woodTexture.repeat.set( 1, .5 );
+		
+    	gameScene.plywoodTexture = loader.cachedAssets[ '/images/plywood.jpg' ];
+		gameScene.plywoodTexture.wrapS = gameScene.plywoodTexture.wrapT = THREE.RepeatWrapping;
+		gameScene.plywoodTexture.repeat.set( 1, .5 );
 		
 		// GROUND
-		// set ground properties, basically a Plane with texture 
-		var groundGeom 		= new THREE.PlaneGeometry( 768, 768 );
-		gameScene.ground 	= new Physijs.BoxMesh( groundGeom, new THREE.MeshPhongMaterial( { map: gameScene.texture, ambient: 0x030303, color: 0x9d5602, specular: 0x009900, shininess: 10, shading: THREE.SmoothShading } ) );
+		// set ground properties, basically a Plane with woodTexture 
+		var groundGeom 		= new THREE.PlaneGeometry( gameScene.GROUND_SIDE, gameScene.GROUND_SIDE );
+		gameScene.ground 	= new Physijs.BoxMesh( groundGeom, new THREE.MeshPhongMaterial( { map: gameScene.woodTexture, ambient: 0x030303, color: 0x9d5602, specular: 0x009900, shininess: 10, shading: THREE.SmoothShading } ) );
 		gameScene.ground.material.ambient = gameScene.ground.material.color;
 		gameScene.ground.name = "ground";
 		gameScene.ground.rotation.x = -90*Math.PI/180;
@@ -136,22 +159,23 @@ GameSceneClass = Class.extend({
 		gameScene.scene.add( gameScene.ground );
 		
 		// WALLS
-		// set walls properties, basically Planes with texture and different colors
-		wallParams = [ 	{ x : 768/2, y: 0, z : 0, rX : -90*Math.PI/180, rY : -90*Math.PI/180, rZ: 0, color : COLOR_RED },
-						{ x : -768/2, y: 0, z : 0, rX : -90*Math.PI/180, rY : 90*Math.PI/180, rZ: 0, color : COLOR_GREEN },
-						{ x : 0, y: 0, z : -768/2, rX : 0, rY : 0, rZ: -90*Math.PI/180, color : COLOR_BLUE },
-						{ x : 0, y: 0, z : 768/2, rX : 0, rY : 180*Math.PI/180, rZ: 90*Math.PI/180, color : COLOR_YELLOW }
+		// set walls properties, basically Planes with woodTexture and different colors
+		wallParams = [ 	{ x : gameScene.GROUND_SIDE/2, y: 0, z : 0, rX : -90*Math.PI/180, rY : -90*Math.PI/180, rZ: 0, color : COLOR_RED },
+						{ x : -gameScene.GROUND_SIDE/2, y: 0, z : 0, rX : -90*Math.PI/180, rY : 90*Math.PI/180, rZ: 0, color : COLOR_GREEN },
+						{ x : 0, y: 0, z : -gameScene.GROUND_SIDE/2, rX : 0, rY : 0, rZ: -90*Math.PI/180, color : COLOR_BLUE },
+						{ x : 0, y: 0, z : gameScene.GROUND_SIDE/2, rX : 0, rY : 180*Math.PI/180, rZ: 90*Math.PI/180, color : COLOR_YELLOW }
 						];
 							
 		for ( i = 0; i < 4; i++ )
 		{
-			wallGeom = new THREE.PlaneGeometry( 768, 768/2 );
-			wall = new Physijs.BoxMesh( groundGeom, new THREE.MeshPhongMaterial( { map: gameScene.texture, ambient: 0x030303, color: wallParams[i].color, specular: 0x009900, shininess: 10, shading: THREE.SmoothShading } ) );
-			wall.position.y = 768/2;
+			wallGeom = new THREE.PlaneGeometry( gameScene.GROUND_SIDE, gameScene.GROUND_SIDE/2 );
+			wall = new Physijs.BoxMesh( groundGeom, new THREE.MeshPhongMaterial( { map: gameScene.woodTexture, ambient: 0x030303, color: wallParams[i].color, specular: 0x009900, shininess: 10, shading: THREE.SmoothShading } ) );
+			wall.name = "wall"+i;
 			wall.material.ambient = 0x030303;
 			
 			wall.position.set( wallParams[i].x, wallParams[i].y, wallParams[i].z );
 			wall.rotation.set( wallParams[i].rX, wallParams[i].rY, wallParams[i].rZ );
+			wall.position.setY( gameScene.GROUND_SIDE/2 );
 			
 			wall.receiveShadow = true;
 			wall.__dirtyPosition = true;
@@ -164,34 +188,49 @@ GameSceneClass = Class.extend({
 		// set the blocks general geometry
 		blockGeom = new THREE.CubeGeometry( gameScene.CUBE_DIMENSIONS.w, gameScene.CUBE_DIMENSIONS.h, gameScene.CUBE_DIMENSIONS.d );
 		
+		// setup a material array for blocks, 
+		// each material related with a color from COLOR_BLOCKS array
+		
+		for ( i = 0; i < COLOR_BLOCKS.length; i++ )
+		{
+			materials[i] = Physijs.createMaterial(
+				new THREE.MeshLambertMaterial( {map: gameScene.metalTexture, 
+												metal : false, 
+												ambient: 0x030303, 
+												color: COLOR_BLOCKS[i], 
+											//	specular: 0x000000, 
+											//	shininess: 2, 
+												shading: THREE.SmoothShading } ),
+				.4, // low friction
+				.1 // low restitution
+			);
+			
+			gameScene.dictColorsMaterials[ COLOR_BLOCKS[i] ] = materials[i];
+		}
+		
 		// create blocks
 		for ( i = 0; i < gameScene.initialObjects; i ++ ) {
 
 			// setup the block's floor and line
 			var floor 	= Math.floor(i/3);
 			var line 	= Math.floor(i%3);
-			// get a random color from COLOR_BLOCKS array
-			color		= COLOR_BLOCKS[ Math.floor( Math.random() * COLOR_BLOCKS.length )];
-
-			// setup the material and properties
-			material = Physijs.createMaterial(
-				new THREE.MeshPhongMaterial( { map: gameScene.texture, metal : true, ambient: 0x030303, color: color, specular: 0x009900, shininess: 10, shading: THREE.SmoothShading } ),
-				.4, // low friction
-				.1 // low restitution
-			);
 			
 			// setup the Mesh
-			block = new Physijs.BoxMesh( blockGeom, material );	
+			block = new Physijs.BoxMesh( blockGeom, materials[ i % materials.length ] );	
 			block.material.transparent = false;
 			block.material.opacity = 1;
-			block.originalColor 	= color;
+			block.originalColor 	= block.material.color.getHex();
 			block.addEventListener( 'collision', gameScene.collideBlocks ); // setup a collision listener to play a sound on collide
 			block.castShadow 		= true;
-			block.receiveShadow 	= true;
+//			block.receiveShadow 	= true;
 
 			gameScene.scene.add( block );
 			gameScene.allBlocks.push( block ); // add the block to allBlocks array
 		}
+		
+		// we create a single material called baseObjectMaterial 
+		// to use when actualObject is highlighted
+		gameScene.baseObjectMaterial = block.material.clone();
 		
 		// setup gameScene.actualObject for initial calls
 		gameScene.actualObject = gameScene.allBlocks[0];
@@ -329,6 +368,7 @@ GameSceneClass = Class.extend({
 		// update camera controls and light
 		gameScene.cameraControls.update();
 		gameScene.spotLight.position.copy( gameScene.camera.position );
+		gameScene.directionalLightContainer.rotation.setY( gameScene.directionalLightContainer.rotation.y + 0.01 );
 		
 		// render the scene
 		gameScene.renderer.render( gameScene.scene, gameScene.camera );
@@ -341,6 +381,11 @@ GameSceneClass = Class.extend({
 		
 		// upate stats
 		gameScene.stats.update();
+		
+		// disable sortObjects once renderer has made his job
+		// this helps (or I hope so) on preformance.
+		if ( gameScene.renderer.sortObjects )
+			gameScene.renderer.sortObjects = false;
 	},
 	
 	/**
@@ -353,6 +398,12 @@ GameSceneClass = Class.extend({
 		gameScene.cameraControls.autoRotate= false;
 		gameScene.cameraControls.userZoom = gameScene.cameraControls.userRotate = true;
 		
+		// set actualObject material to one of the dictionary materials,
+		// this prevents to create a new material for actualObject
+		if ( gameScene.actualObject )
+			gameScene.actualObject.material = gameScene.dictColorsMaterials[ gameScene.actualObject.originalColor ];
+		
+		// reset camera view
 		gameScene.resetView();
 	},
 	
@@ -377,12 +428,18 @@ GameSceneClass = Class.extend({
 		// we need to make a little trick to rotate the vector
 		// to be according with the arrows direction
 		if( gameScene.actualSelection.floor % 2 === 1  )
-		{
+		{	
 			var v = gameScene.actualObject.rotation.clone();
 			v.normalize();
 			vector.cross( v )
 			vector.negate();
 		}
+		
+		// setup actualObject.originalColor to the color of the player, 
+		// so the block will remain with the player's color.
+		// This is useful to keep track of each player's placed block.
+		if( gameScene.actualObject.originalColor != machine.getActiveUserData().color )
+			gameScene.actualObject.originalColor = machine.getActiveUserData().color;
 		
 		// make impulse
 		gameScene.actualObject.setLinearVelocity( vector );
@@ -419,6 +476,20 @@ GameSceneClass = Class.extend({
 	},
 	
 	/**
+	 * called from gameplay handlePlace
+	 * enable physics for the selected block once OK button is pressed in PLACE state
+	 */	
+	placed : function()
+	{
+		gameScene.actualObject.setAngularFactor( new THREE.Vector3(1,1,1) );
+		gameScene.actualObject.setLinearFactor( new THREE.Vector3(1,1,1) );
+		gameScene.actualObject.setAngularVelocity( new THREE.Vector3(0,0,0) );
+		gameScene.actualObject.setLinearVelocity( new THREE.Vector3(0,0,0) );
+		gameScene.actualObject.__dirtyPosition = false;
+		gameScene.actualObject.__dirtyRotation = false;
+	},
+	
+	/**
 	 * reset scene camera controls and camera
 	 */	
 	resetView: function(){
@@ -439,9 +510,9 @@ GameSceneClass = Class.extend({
 		gameScene.cameraControls = new THREE.OrbitControls( gameScene.camera, gameScene.renderer.domElement );
 		gameScene.cameraControls.autoRotate = gameScene.cameraControls.userPan = false;
 		gameScene.cameraControls.userRotate = gameScene.cameraControls.userZoom = true;
-		gameScene.cameraControls.maxPolarAngle = Math.PI/2.5;
-		gameScene.cameraControls.maxDistance = 500;
-		gameScene.cameraControls.minDistance = 50;
+		gameScene.cameraControls.maxPolarAngle = Math.PI/2;
+		gameScene.cameraControls.maxDistance = 250;
+		gameScene.cameraControls.minDistance = 100;
 		gameScene.cameraControls.center.copy( new THREE.Vector3(0,50,0))
 		gameScene.cameraControls.zoomIn(1)
 	}, 
@@ -465,10 +536,10 @@ GameSceneClass = Class.extend({
 					gameScene.blocksGrid[i][j].material.setValues( { color : gameScene.blocksGrid[i][j].originalColor } );
 					gameScene.blocksGrid[i][j].material.transparent = false;
 					gameScene.blocksGrid[i][j].material.opacity = 1;
-					gameScene.blocksGrid[i][j].material.map = gameScene.texture;
+					gameScene.blocksGrid[i][j].material.map = gameScene.metalTexture;
 					gameScene.blocksGrid[i][j].material.needsUpdate = true;
 					gameScene.blocksGrid[i][j].castShadow 		= true;
-					gameScene.blocksGrid[i][j].receiveShadow 	= true;
+					gameScene.blocksGrid[i][j].receiveShadow 	= false;
 				}
 			}
 		}
@@ -481,8 +552,15 @@ GameSceneClass = Class.extend({
 	
 		var i, j, floors, lines;
 		
+		// setup actualObject material
+		// is quite different to the others and funcdamentally is not transparent
+		// use gameScene.baseObjectMaterial
 		if( gameScene.actualObject )
 		{
+			// we use baseObjectMaterial to higlight actualObject without 
+			// modifying other materials and without createing a new material
+			// each time we select a block
+			gameScene.actualObject.material = gameScene.baseObjectMaterial;
 			gameScene.actualObject.material.setValues( { color : machine.getActiveUserData().color } );
 			gameScene.actualObject.material.ambient 	= gameScene.actualObject.material.color;
 			gameScene.actualObject.material.transparent = false;
@@ -493,24 +571,39 @@ GameSceneClass = Class.extend({
 			gameScene.actualObject.receiveShadow 		= true;
 		}
 		
+		
+		// set all the other blocks materials transparency
 		for ( i = 0, floors = gameScene.blocksGrid.length; i < floors; i++ )
 		{
 			for ( j = 0, lines = gameScene.blocksGrid[i].length; j < lines; j++ )
 			{
 				if ( gameScene.blocksGrid[i][j] && gameScene.blocksGrid[i][j] != gameScene.actualObject )
 				{
-					gameScene.blocksGrid[i][j].material.setValues( { color : COLOR_GRAY } );
-					gameScene.blocksGrid[i][j].material.ambient 	= gameScene.blocksGrid[i][j].material.color;
-					gameScene.blocksGrid[i][j].material.transparent = true;
-					gameScene.blocksGrid[i][j].material.opacity = .5;
-					gameScene.blocksGrid[i][j].material.map = null;
-					gameScene.blocksGrid[i][j].material.needsUpdate = true;
+					// if the block has a different material than its original material
+					// means that it was previously an actualObject, so we reset its material
+					// to the original one. This helps to prevent creating new materials each time
+					// we setup a new actualObject (see line 561)
+					if( gameScene.blocksGrid[i][j].material != gameScene.dictColorsMaterials[ gameScene.blocksGrid[i][j].originalColor ] )
+						gameScene.blocksGrid[i][j].material = gameScene.dictColorsMaterials[ gameScene.blocksGrid[i][j].originalColor ];
+					
+					if( !gameScene.blocksGrid[i][j].material.transparent )
+					{
+						gameScene.blocksGrid[i][j].material.setValues( { color : COLOR_GRAY } );
+						gameScene.blocksGrid[i][j].material.ambient 	= gameScene.blocksGrid[i][j].material.color;
+						gameScene.blocksGrid[i][j].material.transparent = true;
+						gameScene.blocksGrid[i][j].material.opacity = .5;
+						gameScene.blocksGrid[i][j].material.map = null;
+					}
+					
 					gameScene.blocksGrid[i][j].castShadow 		= false;
 					gameScene.blocksGrid[i][j].receiveShadow 	= false;
+					gameScene.blocksGrid[i][j].material.needsUpdate = true;
 				}
 			}
 		}
 		
+		// set up renderer to sortObjects in next
+		// rendering pass. It is important for transparency z-index issues.
 		gameScene.renderer.sortObjects = true;
 	}, 
 	

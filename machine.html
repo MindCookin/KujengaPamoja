@@ -45,6 +45,16 @@
 			<!-- GAME WRAPPER ( canvas ) -->
 			<div id="game_wrapper" class="box-shadowed">
 				
+				<!-- DESKTOP PLAYER -->
+				<div id="desktopPlayerButtons">
+					<a id="btnUp" class="btnArrow"><div class="arrow"></div>UP</a>
+					<a id="btnDown" class="btnArrow"><div class="arrow"></div>DOWN</a>
+					<a id="btnLeft" class="btnArrow"><div class="arrow"></div>LEFT</a>
+					<a id="btnRight" class="btnArrow"><div class="arrow"></div>RIGHT</a>
+					<a id="btnSpacebar" class="btnSpacebar"><div class="arrow"></div>SPACEBAR</a>
+					<a id="btnAccurate" class="btnAccurate">Accurate</a>
+				</div>
+				
 				<!-- TOOLBAR -->
 				<ul id="toolbar">
 					<li><a class="btnStats" href="#" title="View Stats">View Stats</a></li>
@@ -56,26 +66,30 @@
 				<!-- CAMERA CONTROLS INFO -->
 				<p id="camera_controls_info">Your URL is <span>{{ game_url }}</span>. Click and drag with your mouse to move the camera. Use mouse wheel for zoom control.</p>
 				
-			
-			<!-- INITIAL SCREEN	-->
-			<div id="initial_screen" class="popup box-shadowed">
-				<p>	Kujenga Pamoja is an interactive experience to play with your friends, based on the famous game "Jenga". 
-					Open the following URL in your smartphones <span class="white">(Enable WiFi connection if you can)</span>. If you don't have any you can open it in a new browser's tab:</p>
-				<p class="align-center"><a class="url" href="{{ game_url }}">{{ game_url }}</a> <br/><span>(Please pay attention to letter case)</span></p>
-				<p class="startFun">Well done! When you are all connected, click Play and let the fun begin!</p>
-				<a class="btnPlay box-shadowed">PLAY</a>
-			</div>
-			<!-- STATS SCREEN -->
-			<div id="stats_screen" class="popup box-shadowed">
-				<h3 class="align-center">You have lost</h3>
-				<p class="sentence">[SENTENCE]</p>
-				<a class="btnPlay box-shadowed">PLAY AGAIN</a>
-			</div>
-			<!-- INFO SCREEN -->
-			<div id="info_screen" class="popup box-shadowed green">
-				<a class="btnMinify" href="#">x</a>
-				<p>info screen</p>
-			</div> 
+				<!-- INITIAL SCREEN	-->
+				<div id="initial_screen" class="popup box-shadowed">
+					<p>	Kujenga Pamoja is an interactive experience to play with your friends, based on the famous game "Jenga". 
+						Open the following URL in your smartphones <span class="white">(Enable WiFi connection if you can)</span>, or play with your keyboard:</p>
+					<div id="selectMode">
+						<p class="align-center gameMode"><a class="url" href="{{ game_url }}">{{ game_url }}</a> <br/><span>(Please pay attention to letter case)</span></p>
+						<p class="align-center or"><br/>or</p>
+						<p class="align-center gameMode"><a class="desktopPlayer" href="#">Add a desktop player</a> <br/><span>(Will play with keyboard)</span></p>
+					</div>
+					<p class="startFun">Well done! When you are all connected, click Play and let the fun begin!</p>
+					<a class="btnPlay box-shadowed">PLAY</a>
+				</div>
+				<!-- STATS SCREEN -->
+				<div id="stats_screen" class="popup box-shadowed">
+					<h3 class="align-center">You have lost</h3>
+					<p class="sentence">[SENTENCE]</p>
+					<a class="btnPlay box-shadowed">PLAY AGAIN</a>
+				</div>
+				<!-- INFO SCREEN -->
+				<div id="info_screen" class="popup box-shadowed green">
+					<a class="btnMinify" href="#">x</a>
+					<p>info screen</p>
+				</div> 
+				
 			</div>
 			
 			<!-- PLAYERS SIDEBAR -->
@@ -126,7 +140,7 @@
 					connections.game_url	= '{{ game_url }}';
 					connections.game_key 	= '{{ game_key }}';
 					connections.me			= '{{ me }}';
-					connections.token = '{{ token }}';
+					connections.token 		= '{{ token }}';
 					
 					// start machine
 					machine.start();

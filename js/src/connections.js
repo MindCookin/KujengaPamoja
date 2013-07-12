@@ -47,10 +47,11 @@ ConnectionClass = EventBusClass.extend({
  	 * @param {String} path
  	 * @param {String} opt_param
 	 */
-	sendMessage : function(path, opt_param) {
+	sendMessage : function(path, opt_param, opt_user) {
 		
 		// set the URL
-		path += '?g=' + connections.game_key + '&u=' + connections.me;
+		var user = ( opt_user ) ? opt_user : connections.me;
+		path += '?g=' + connections.game_key + '&u=' + user;
 		
 		if (opt_param) {
 			path += '&' + opt_param;
@@ -99,12 +100,12 @@ ConnectionClass = EventBusClass.extend({
 			}
 			else	
 			{
-				connections.data.users[0] 	= newState.user1;
-				connections.data.users[1] 	= newState.user2;
-				connections.data.users[2] 	= newState.user3;
-				connections.data.users[3] 	= newState.user4;
+				connections.data.users[0] 	= { id : newState.user1, isDesktop : ( newState.desktop_users.indexOf( newState.user1 ) > 0 ) };
+				connections.data.users[1] 	= { id : newState.user2, isDesktop : ( newState.desktop_users.indexOf( newState.user2 ) > 0 ) };
+				connections.data.users[2] 	= { id : newState.user3, isDesktop : ( newState.desktop_users.indexOf( newState.user3 ) > 0 ) };
+				connections.data.users[3] 	= { id : newState.user4, isDesktop : ( newState.desktop_users.indexOf( newState.user4 ) > 0 ) };
 				connections.data.machine	= newState.machine;
-				connections.data.active 	= newState.active;
+				connections.data.active 	= { id : newState.active, isDesktop : ( newState.desktop_users.indexOf( newState.active ) > 0 ) };;
 				connections.data.press  	= newState.press;
 				connections.data.accuracy	= newState.accuracy;
 				connections.data.lose  		= newState.lose;

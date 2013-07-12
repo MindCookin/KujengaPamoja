@@ -198,12 +198,7 @@ GamePlayClass = Class.extend({
 		
 			// if there is no direction, it means that OK button has been pressed.
 			// it is time to add physics to the block
-			gameScene.actualObject.setAngularFactor( new THREE.Vector3(1,1,1) );
-			gameScene.actualObject.setLinearFactor( new THREE.Vector3(1,1,1) );
-			gameScene.actualObject.setAngularVelocity( new THREE.Vector3(0,0,0) );
-			gameScene.actualObject.setLinearVelocity( new THREE.Vector3(0,0,0) );
-			gameScene.actualObject.__dirtyPosition = false;
-			gameScene.actualObject.__dirtyRotation = false;
+			gameScene.placed();
 		}
 	}, 
 	

@@ -25,6 +25,7 @@ class Game(db.Model):
 	user3 	= db.StringProperty()
 	user4 	= db.StringProperty()
 	active  = db.StringProperty()
+	desktop_users = db.StringProperty()
 	press  	= db.IntegerProperty()
 	accuracy= db.BooleanProperty()
 	loose  	= db.BooleanProperty()
@@ -48,6 +49,7 @@ class GameUpdater():
 			"user3" 	: '' if not self.game.user3 else self.game.user3,
 			"user4" 	: '' if not self.game.user4 else self.game.user4,
 			"active" 	: self.game.active,
+			"desktop_users" : '' if not self.game.desktop_users else self.game.desktop_users,
 			"press"  	: self.game.press,
 			"accuracy"  : self.game.accuracy,
 			"loose"  	: self.game.loose,
@@ -242,6 +244,41 @@ class Lose(webapp2.RequestHandler):
 		GameUpdater(game).send_update()
 
 """
+Sent by Machine when a new desktop user is created
+Notify all
+"""							
+class AddDesktopUser(webapp2.RequestHandler):
+
+	def post(self):
+		game = GameFromRequest(self.request).get_game()
+		
+		#check if the users are full
+		if not game.user4 :
+			# if they aren't, we create a new one and add him to game model
+			user = id_generator(21, string.digits )
+		
+			if not game.user1 :
+				game.user1 = user
+			elif not game.user2 :
+				game.user2 = user
+			elif not game.user3 :
+				game.user3 = user
+			elif not game.user4 :
+				game.user4 = user
+				
+			# and update game state in consecuence
+			if game.state == 0:
+				game.state = 1
+			
+			if not game.desktop_users : 
+				game.desktop_users = ""
+				
+			game.desktop_users += "_" + user			
+			game.put()
+			GameUpdater(game).send_update()
+
+
+"""
 Called when opening the main url or the player url
 Initializes game model, creates new token and user/machine identifiers, updates all changes and send notifications to all
 """									
@@ -269,8 +306,8 @@ class Main(webapp2.RequestHandler):
 			
 			# create a new game model
 			game = Game(
-				key_name = game_key,
-				machine = user,
+				key_name 		= game_key,
+				machine 		= user,
 				state	= 0
 			)
 			game.put()
@@ -343,6 +380,7 @@ Application rooting
 """			
 application = webapp2.WSGIApplication([
     ('/', Main),
+    ('/addDesktopUser', AddDesktopUser),
     ('/opened', Opened),
     ('/closed', Closed),
     ('/startGame', StartGame),

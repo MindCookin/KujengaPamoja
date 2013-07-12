@@ -18,6 +18,10 @@ var	MACHINE_PLAYERMOVE 		= "Move your block and release it from the block tower 
 var	MACHINE_PLAYERPLACE		= "Good! Now select a position to place your block and pass the buck to the next one." ;
 var	MACHINE_CHECKPLACE		= 'Stability checking...';
 
+var	MACHINE_PLAYERSELECT_DESKTOP 	= "[ACTIVE]'s turn. Select a block with your arrow keys and press SPACEBAR when done."; 
+var	MACHINE_PLAYERMOVE_DESKTOP 		= "Move your block, try to release it from the block tower without dropping any other block."; 
+var	MACHINE_PLAYERPLACE_DESKTOP		= "Good! Now select a position to place your block and press SPACEBAR when you are done. Press A to switch accurate mode." ;
+
 // Texts to show in player
 var	PLAYER_WAIT 	= 'Wait for your turn'; 
 var	PLAYER_SELECT 	= 'Select a block'; 

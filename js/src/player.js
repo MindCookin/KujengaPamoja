@@ -85,7 +85,7 @@ PlayerClass = Class.extend({
 	
 		// if player is the active player, 
 		// show buttons
-		if( connections.data.active == connections.me )
+		if( connections.data.active.id == connections.me )
 		{
 			$('h1').css( 'fontSize', '30px' );
 			$('h1').text(PLAYER_SELECT);
@@ -108,7 +108,7 @@ PlayerClass = Class.extend({
 	
 		// if player is the active player 
 		// and is the first call we setup the display
-		if( connections.data.active == connections.me && $('h1').text() != PLAYER_MOVE )
+		if( connections.data.active.id == connections.me && $('h1').text() != PLAYER_MOVE )
 		{
 			$('h1').text(PLAYER_MOVE);
 			TweenMax.to( '#btnOK', .5, { scaleX : 0, scaleY : 0, autoAlpha : true, ease : "Power3.easeOut", overwrite : 1 } )
@@ -122,7 +122,7 @@ PlayerClass = Class.extend({
 	
 		// if player is the active player 
 		// and is the first call we setup the display
-		if( connections.data.active == connections.me && $('h1').text() != PLAYER_PLACE )
+		if( connections.data.active.id == connections.me && $('h1').text() != PLAYER_PLACE )
 		{
 			$('h1').text(PLAYER_PLACE);
 			TweenMax.to( '#btnOK', .5, { scaleX : 1, scaleY : 1, autoAlpha : true, ease : "Power3.easeOut", overwrite : 1 } )
@@ -137,7 +137,7 @@ PlayerClass = Class.extend({
 	
 		// if player is the active player 
 		// and is the first call we setup the display
-		if( connections.data.active == connections.me && $('h1').text() != PLAYER_CHECKPLACE )
+		if( connections.data.active.id == connections.me && $('h1').text() != PLAYER_CHECKPLACE )
 			$('h1').text(PLAYER_CHECKPLACE);
 			
 		player.hideButtons();	
@@ -150,7 +150,7 @@ PlayerClass = Class.extend({
 	
 		// if player is the active player 
 		// and is the first call we setup the display
-		if( connections.data.active == connections.me && $('h1').text() != PLAYER_LOSE )
+		if( connections.data.active.id == connections.me && $('h1').text() != PLAYER_LOSE )
 			$('h1').text(PLAYER_LOSE);
 			
 		player.hideButtons();
