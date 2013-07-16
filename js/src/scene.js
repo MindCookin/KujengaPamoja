@@ -96,6 +96,9 @@ GameSceneClass = Class.extend({
 
 		// CAMERA CONTROLS
 		// helper for controlling the camera. 
+		gameScene.cameraControls = new THREE.OrbitControls( gameScene.camera, gameScene.renderer.domElement );
+		gameScene.cameraControls.center.copy( new THREE.Vector3(0,50,0))
+		
 		gameScene.resetView();
 		gameScene.cameraControls.autoRotate= true;
 		gameScene.cameraControls.userRotate = gameScene.cameraControls.userPan = gameScene.cameraControls.userZoom = false;
@@ -494,27 +497,26 @@ GameSceneClass = Class.extend({
 	 */	
 	resetView: function(){
 		
+			
+		gameScene.cameraControls.autoRotate = gameScene.cameraControls.userPan = false;
+		gameScene.cameraControls.userRotate = gameScene.cameraControls.userZoom = true;
+		gameScene.cameraControls.maxPolarAngle = Math.PI/2;
+		gameScene.cameraControls.maxDistance = 250;
+		gameScene.cameraControls.minDistance = 100;
+		gameScene.cameraControls.zoomIn(1)
+		
 		// check if it is the first call or not 
 		if( connections.data.users[0] )
 		{
 			// if not, we add a friendly animation 
 			TweenMax.to( gameScene.camera, 1, { fov : 50, onUpdate : function(){ gameScene.camera.updateProjectionMatrix() } } )
 			TweenMax.to( gameScene.camera.position, 1, { x : -109, y : 143, z : 200 } )
+			TweenMax.to( gameScene.cameraControls.lookAtTarget, 1, {	x : 0, y : 50, z : 0	} )	
 		} else {
 			gameScene.camera.fov = 50;
 			gameScene.camera.updateProjectionMatrix();
 			gameScene.camera.position.set( -109, 143, 200 );
 		}
-
-		// reset our camera controls
-		gameScene.cameraControls = new THREE.OrbitControls( gameScene.camera, gameScene.renderer.domElement );
-		gameScene.cameraControls.autoRotate = gameScene.cameraControls.userPan = false;
-		gameScene.cameraControls.userRotate = gameScene.cameraControls.userZoom = true;
-		gameScene.cameraControls.maxPolarAngle = Math.PI/2;
-		gameScene.cameraControls.maxDistance = 250;
-		gameScene.cameraControls.minDistance = 100;
-		gameScene.cameraControls.center.copy( new THREE.Vector3(0,50,0))
-		gameScene.cameraControls.zoomIn(1)
 	}, 
 	
 	/**
@@ -702,6 +704,7 @@ GameSceneClass = Class.extend({
 		
 		var floor 	= gameScene.blocksGrid.length + 1;
 		var line 	= 1;
+		var lookAtTarget;
 		var targetPosition	= new THREE.Vector3();
 		var targetRotation	= new THREE.Vector3();
 		var physicsLimiter	= new THREE.Vector3();
@@ -720,6 +723,8 @@ GameSceneClass = Class.extend({
 		targetRotation.x = 0;
 		targetRotation.y = ( floor % 2 === 0 ) ? 0 : Math.PI / 2.01;
 		targetRotation.z = 0;
+		
+		lookAtTarget = targetPosition.clone();
 
 		// we do not simulate physics right now
 		// it will create strange behaviours
@@ -732,9 +737,11 @@ GameSceneClass = Class.extend({
 		gameScene.renderer.sortObjects = true;
 		TweenMax.to( gameScene.actualObject.position, .5, { x : targetPosition.x, y : targetPosition.y, z : targetPosition.z, onUpdate : function(){ 
 			gameScene.actualObject.__dirtyPosition = true; 
+			
+			// set sort objects flag to true 
+			// to handle transparency issues
 			gameScene.renderer.sortObjects = true;
 			} } )
-		
 		
 		// we need to tween separatedly rotation and position
 		gameScene.actualObject.__dirtyRotation = true;
@@ -745,6 +752,11 @@ GameSceneClass = Class.extend({
 						connections.sendMessage('/moveOK');
 						gameScene.checkSimulation = true;
 					} } )	
+		
+		// update look at target
+		TweenMax.to( gameScene.cameraControls.lookAtTarget, .5, { 
+					x : lookAtTarget.x, y : lookAtTarget.y, z : lookAtTarget.z 
+				} )	
 		
 		
 		// play lift sound

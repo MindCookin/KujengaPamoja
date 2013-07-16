@@ -33,6 +33,8 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 	this.minDistance = 0;
 	this.maxDistance = Infinity;
+	
+	this.lookAtTarget = this.center;
 
 	this.keys = { LEFT: 37, UP: 38, RIGHT: 39, BOTTOM: 40 };
 
@@ -42,7 +44,7 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 	var EPS = 0.000001;
 	var PIXELS_PER_ROUND = 1800;
-
+		
 	var rotateStart = new THREE.Vector2();
 	var rotateEnd = new THREE.Vector2();
 	var rotateDelta = new THREE.Vector2();
@@ -63,7 +65,6 @@ THREE.OrbitControls = function ( object, domElement ) {
 	// events
 
 	var changeEvent = { type: 'change' };
-
 
 	this.rotateLeft = function ( angle ) {
 
@@ -186,7 +187,10 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 		position.copy( this.center ).add( offset );
 
-		this.object.lookAt( this.center );
+		if( this.lookAtTarget === undefined )
+			this.object.lookAt( this.center );
+		else
+			this.object.lookAt( this.lookAtTarget );
 
 		thetaDelta = 0;
 		phiDelta = 0;
