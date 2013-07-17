@@ -76,14 +76,13 @@ GameSceneClass = Class.extend({
 		// RENDERER
 		// check WebGLRenderer capabilities
 		try {
-			gameScene.renderer = new THREE.WebGLRenderer( { antialias: true, sortObjects : false, shadowMapEnabled : true, shadowMapType : THREE.PCFShadowMap } );
+			gameScene.renderer = new THREE.WebGLRenderer( { antialias: true, sortObjects : true, shadowMapEnabled : true, shadowMapType : THREE.PCFShadowMap } );
 		} catch(error) {
 			alert( "Three.js WebGLRenderer is not supported on your browser. Please open Kujenga Pamonga on Google Chrome to see the full experience.");
 			return;
 		}
 		
 		// 
-		gameScene.renderer.sortObjects = false;						// we do not need to check sort on every loop
 		gameScene.renderer.setSize( gameScene.VIEWPORT_DIMENSIONS.w, gameScene.VIEWPORT_DIMENSIONS.h );	// set dimensions
 		gameScene.renderer.shadowMapEnabled = true;					// needed to cast shadows
 		gameScene.renderer.shadowMapType 	= THREE.PCFShadowMap;
@@ -279,7 +278,7 @@ GameSceneClass = Class.extend({
 		$(window).resize( gameScene.resize );
 		gameScene.resize();
 	},
-
+	
 	/**
 	 * resize handler
 	 * updates viewport VIEWPORT_DIMENSIONS 
@@ -384,11 +383,6 @@ GameSceneClass = Class.extend({
 		
 		// upate stats
 		gameScene.stats.update();
-		
-		// disable sortObjects once renderer has made his job
-		// this helps (or I hope so) on preformance.
-		if ( gameScene.renderer.sortObjects )
-			gameScene.renderer.sortObjects = false;
 	},
 	
 	/**
@@ -603,10 +597,6 @@ GameSceneClass = Class.extend({
 				}
 			}
 		}
-		
-		// set up renderer to sortObjects in next
-		// rendering pass. It is important for transparency z-index issues.
-		gameScene.renderer.sortObjects = true;
 	}, 
 	
 	/**
@@ -731,16 +721,11 @@ GameSceneClass = Class.extend({
 		gameScene.checkSimulation = false;
 		
 		// Tween the object to its new position
-		// we need to hack __dirtyPosition and sortObjects on each iteration
+		// we need to hack __dirtyPosition on each iteration
 		// for physics and backface culling behaviours
 		gameScene.actualObject.__dirtyPosition = true;
-		gameScene.renderer.sortObjects = true;
 		TweenMax.to( gameScene.actualObject.position, .5, { x : targetPosition.x, y : targetPosition.y, z : targetPosition.z, onUpdate : function(){ 
 			gameScene.actualObject.__dirtyPosition = true; 
-			
-			// set sort objects flag to true 
-			// to handle transparency issues
-			gameScene.renderer.sortObjects = true;
 			} } )
 		
 		// we need to tween separatedly rotation and position
