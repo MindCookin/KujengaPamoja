@@ -7,7 +7,10 @@
 
 // Debug mode flag 
 var DEBUG_MODE = ( location.host.indexOf( "localhost" ) >= 0 );
-console.log( "DEBUG_MODE ------------> ", DEBUG_MODE );
+
+if (DEBUG_MODE) {
+  console.log( "DEBUG_MODE ------------> ", DEBUG_MODE );
+}
 
 LoaderClass = Class.extend({	
 	
@@ -15,7 +18,7 @@ LoaderClass = Class.extend({
 	happy_face : "^-^",
 	
 	// a set of arrays containing the path to all our assets
-	javascript_libs	:[ "/_ah/channel/jsapi", "http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js", "/js/libs/three.min.js", '/js/libs/greensock/TweenMax.min.js' ],
+	javascript_libs	:[ "/_ah/channel/jsapi", "https://code.jquery.com/jquery-1.11.3.min.js", "/js/libs/three.min.js", '/js/libs/greensock/TweenMax.min.js' ],
 	javascript_src_mini	:[ "/js/libs/physi-min.js", "/js/libs/stats.min.js", "/js/machine-min.js" ],
 	javascript_src_debug:[	// load javascript_src_debug instead of javascript_src_mini whenever you want to debug the code. Minified source is hard to debug.
 		"/js/src/constants.js", 
