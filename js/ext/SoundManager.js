@@ -18,14 +18,14 @@ SoundManager = Class.extend({
 	create: function () {
 		
 		try {
-	       	sndManager._context = new webkitAudioContext();
+	       	sndManager._context = new AudioContext();
 		} catch(e){
 //			window.alert("Your browser do not support Web Audio, sorry.");
 		}
 		
 		if( sndManager._context )
 		{
-        	sndManager._mainNode = sndManager._context.createGainNode(0);
+        	sndManager._mainNode = sndManager._context.createGain(0);
         	sndManager._mainNode.connect( sndManager._context.destination );
         }
 	},
@@ -103,12 +103,12 @@ SoundManager = Class.extend({
 		
 		var currentClip = null;
 		currentClip = sndManager._context.createBufferSource();
-        currentClip.buffer = sd.b;
-		currentClip.gain.value = volume;
+    currentClip.buffer = sd.b;
+	  //currentClip.gain.value = volume;
 		currentClip.loop = looping;
 		
 		currentClip.connect( sndManager._mainNode );
-        currentClip.noteOn( 0 );
+    currentClip.start();
 
 		return true;
 	},
